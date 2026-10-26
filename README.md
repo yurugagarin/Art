@@ -4,9 +4,9 @@ Motivasyonun düştüğünde açıp bakacağın kişisel söz uygulaması. Tam e
 
 ## Neler var?
 
-- **Akış:** Her gün farklı sırayla gelen 150'den fazla söz.
+- **Akış:** Her gün farklı sırayla gelen yaklaşık 150 gerçek söz. Hepsinin altında kimin söylediği yazar; İngilizce olanların altında Türkçesi de vardır.
   - **Sağa kaydır:** Söz akışta kalır, ileride yine karşına çıkar.
-  - **Sola kaydır:** Söz bir daha gösterilmez. Yanlışlıkla yaptıysan çıkan bildirimdeki **Geri al**'a ya da kartın sağındaki geri okuna bas. Akıştan çıkardıklarını **Favoriler** sayfasının altından tek tek ya da hepsini birden geri getirebilirsin.
+  - **Sola kaydır:** Söz bir daha gösterilmez. Yanlışlıkla yaptıysan kartın sağındaki geri okuna bas. Akıştan çıkardıklarını **Favoriler** sayfasının altından tek tek ya da hepsini birden geri getirebilirsin.
   - Bilgisayarda: → tekrar gör, ← bir daha gösterme, Backspace geri al.
   - **İki kez dokun:** Söz favorilere eklenir (kalp animasyonuyla).
   - **Bir kez dokun:** Menüler gizlenir, sadece fotoğraf ve söz kalır. Tekrar dokununca geri gelir.
@@ -58,14 +58,15 @@ npm run preview  # derlenmiş hali yerelde dene
 Sözler `src/data/quotes.ts` dosyasında duruyor:
 
 ```ts
-{ id: 's37', cat: 'spor', text: 'Practice makes perfect.', tr: 'Pratik, mükemmelleştirir.', author: 'İngiliz atasözü' },
-{ id: 'h33', cat: 'hatirlat', text: 'Bugün de geldin. Bu yeter.' },
+{ id: 's60', cat: 'spor', text: 'Practice makes perfect.', tr: 'Pratik, mükemmelleştirir.', author: 'İngiliz atasözü' },
+{ id: 'h65', cat: 'hatirlat', text: 'Act as if what you do makes a difference. It does.', tr: 'Yaptığın şey fark yaratıyormuş gibi davran. Çünkü yaratıyor.', author: 'William James' },
 ```
 
-- `id`: Benzersiz olmalı (favoriler buna göre tutulur).
+- `id`: Benzersiz olmalı ve silinmiş bir sözün kimliği tekrar kullanılmamalı (favoriler ve gizlenenler buna göre tutulur).
 - `cat`: `spor` | `disiplin` | `hatirlat` | `yaz` | `bilgelik`
 - `text`: Sözün kendisi. İngilizceyse `tr` alanına Türkçesini yaz.
-- `author`, `note`: İsteğe bağlı. Sözün kime ait olduğu kesin değilse `note: '… atfedilir'` yaz.
+- `author`: Sözün sahibi. Kaynağı belli olmayan söz eklemiyoruz.
+- `note`: İsteğe bağlı kaynak bilgisi (kitap, konuşma). Sözün o kişiye ait olduğu kesin değilse `note: '… atfedilir'` yaz.
 
 ## Fotoğraflar
 

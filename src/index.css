@@ -1,5 +1,5 @@
 :root {
-  --bg: #140f14;
+  --bg: #0e090c;
   --bg-2: #1d1519;
   --ink: #fff8f0;
   --muted: rgba(255, 248, 240, 0.66);
@@ -12,8 +12,11 @@
   --serif: 'Fraunces Variable', 'Iowan Old Style', Georgia, serif;
   --sans: 'Plus Jakarta Sans Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --tabbar-space: calc(var(--safe-bottom) + 96px);
+  --vh-gap: 0px;
+  /* Gerçek alt güvenli alan (iOS ana ekran hatasında env() 0 dönebilir). */
+  --safe-bottom: max(env(safe-area-inset-bottom, 0px), var(--vh-gap));
+  --tabbar-bottom: max(12px, calc(var(--safe-bottom) - 10px));
+  --tabbar-space: calc(var(--tabbar-bottom) + 86px);
 
   color-scheme: dark;
   font-family: var(--sans);
@@ -77,9 +80,11 @@ button:disabled {
 }
 
 .app.tab-akis {
-  height: 100dvh;
+  height: 100%;
   overflow: hidden;
 }
+
+
 
 .main {
   position: relative;
@@ -95,7 +100,7 @@ button:disabled {
   position: fixed;
   inset: 0;
   overflow: hidden;
-  background: #000;
+  background: var(--bg);
 }
 
 .feed-top {
@@ -677,7 +682,7 @@ button:disabled {
 .tabbar {
   position: fixed;
   left: 50%;
-  bottom: calc(var(--safe-bottom) + 14px);
+  bottom: calc(var(--tabbar-bottom) - var(--vh-gap));
   z-index: 20;
   display: flex;
   gap: 2px;
@@ -865,7 +870,7 @@ button:disabled {
   inset: 0;
   z-index: 30;
   background: #000;
-  --tabbar-space: calc(var(--safe-bottom) + 34px);
+  --tabbar-space: calc(var(--safe-bottom) + 30px);
 }
 
 .viewer-close {
@@ -1580,5 +1585,16 @@ button:disabled {
 @media (prefers-reduced-motion: reduce) {
   .photo-img.kb {
     animation: none;
+  }
+}
+
+/* Tam ekran katmanlar: iOS'ta görünür alan kısa kalırsa ekranın en altına kadar uzanır. */
+@media (max-width: 719px) {
+  .feed,
+  .viewer,
+  .sheet-root,
+  .tips,
+  .burst-layer {
+    bottom: calc(-1 * var(--vh-gap));
   }
 }

@@ -69,16 +69,8 @@ export function CardDeck({ quotes, currentId, onCurrent, mode, keyboard, badgeFo
   const onSwipe = (dir: SwipeDir, q: Quote) => {
     const next = quotes[mod(index + 1, n)]
     push({ id: q.id, dir })
-    if (mode === 'feed' && dir === 'left') {
-      hideQuote(q.id)
-      toast('Bu söz bir daha gösterilmeyecek', {
-        label: 'Geri al',
-        run: () => {
-          if (history.current.at(-1)?.id === q.id) goBack()
-          else unhideQuote(q.id)
-        },
-      })
-    }
+    // Bildirim yok: yanlışlıkla atılan söz, kartın sağındaki geri okuyla geri gelir.
+    if (mode === 'feed' && dir === 'left') hideQuote(q.id)
     if (next && next.id !== q.id) onCurrent(next.id)
   }
 
