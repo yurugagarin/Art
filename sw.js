@@ -1,8 +1,8 @@
-// Kıvılcım service worker: uygulamayı çevrimdışı açılabilir yapar,
+// Momentum service worker: uygulamayı çevrimdışı açılabilir yapar,
 // görülen fotoğrafları telefonda önbelleğe alır.
-const VERSION = 'v1'
-const SHELL = `kivilcim-shell-${VERSION}`
-const PHOTOS = 'kivilcim-photos'
+const VERSION = 'v2'
+const SHELL = `momentum-shell-${VERSION}`
+const PHOTOS = 'momentum-photos'
 const MAX_PHOTOS = 80
 
 self.addEventListener('install', (event) => {
@@ -14,7 +14,7 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches
       .keys()
-      .then((keys) => Promise.all(keys.filter((k) => k.startsWith('kivilcim-shell-') && k !== SHELL).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k !== SHELL && k !== PHOTOS).map((k) => caches.delete(k))))
       .then(() => self.clients.claim()),
   )
 })
