@@ -29,7 +29,7 @@ export function PhotoBg({ photo, moving, thumb }: Props) {
           src={src}
           alt=""
           draggable={false}
-          decoding={instant ? 'sync' : 'async'}
+          decoding="async"
           className={`photo-img${loaded ? ' on' : ''}${instant ? ' instant' : ''}${moving ? ' kb' : ''}`}
           ref={(img) => {
             if (img?.complete && img.naturalWidth > 0 && !loaded) done()
@@ -38,7 +38,6 @@ export function PhotoBg({ photo, moving, thumb }: Props) {
           onError={() => markBroken(photo.id)}
         />
       )}
-      <div className="grain" />
     </div>
   )
 }

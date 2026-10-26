@@ -3,7 +3,7 @@ import type { Quote } from '../data/quotes'
 import { mod, shareQuote } from '../lib/deck'
 import { preload } from '../lib/imageCache'
 import { photoForQuote, usePhotos } from '../lib/photos'
-import { addFav, hideQuote, setPhotoFor, toggleFav, unhideQuote, useStore } from '../lib/store'
+import { addFav, hideQuote, markBroken, setPhotoFor, toggleFav, unhideQuote, useStore } from '../lib/store'
 import { toast } from '../lib/toast'
 import { burstHeart } from './HeartBurst'
 import { PhotoGrid } from './PhotoGrid'
@@ -44,7 +44,11 @@ export function CardDeck({ quotes, currentId, onCurrent, mode, keyboard, badgeFo
   // Sıradaki kartların fotoğraflarını şimdiden indirip hazırla.
   useEffect(() => {
     if (!n) return
-    for (const d of [1, 2, 3, 4, 5, -1]) preload(photoForQuote(quotes[mod(index + d, n)], photos, photoFor).src)
+    for (const d of [1, 2, 3, 4, -1]) {
+      const p = photoForQuote(quotes[mod(index + d, n)], photos, photoFor)
+      // Yüklenemeyen fotoğraf, kart daha ekrana gelmeden değiştirilir.
+      if (!p.own) preload(p.src, () => markBroken(p.id))
+    }
   }, [index, n, quotes, photos, photoFor])
 
   const push = (entry: { id: string; dir: SwipeDir }) => {
@@ -56,13 +60,13 @@ export function CardDeck({ quotes, currentId, onCurrent, mode, keyboard, badgeFo
     const last = history.current.pop()
     setHistoryLen(history.current.length)
     if (last) {
-      deck.current?.back(last.dir, () => {
+      deck.current?.back(last.dir, last.id, () => {
         if (mode === 'feed' && last.dir === 'left') unhideQuote(last.id)
         onCurrent(last.id)
       })
     } else if (mode === 'browse' && n > 1) {
       const prev = quotes[mod(index - 1, n)]
-      deck.current?.back('left', () => onCurrent(prev.id))
+      deck.current?.back('left', prev.id, () => onCurrent(prev.id))
     }
   }, [mode, n, quotes, index, onCurrent])
 
@@ -104,14 +108,16 @@ export function CardDeck({ quotes, currentId, onCurrent, mode, keyboard, badgeFo
           navigator.vibrate?.(12)
           addFav(q.id)
         }}
-        render={(q, active) => (
+        render={(q, role) => (
           <QuoteCard
             quote={q}
             photo={photoForQuote(q, photos, photoFor)}
-            active={active}
+            active={role === 'top'}
+            // Yavaş yakınlaşma sadece üstteki kartta çalışır.
+            moving={role === 'top'}
             fav={favs.includes(q.id)}
             badge={badgeFor?.(q)}
-            canBack={active && canBack}
+            canBack={role === 'top' && canBack}
             onBack={goBack}
             onFav={() => fav(q)}
             onShare={() => share(q)}

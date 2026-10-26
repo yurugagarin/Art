@@ -44,7 +44,19 @@ export function photoForQuote(q: Quote, photos: Photo[], photoFor: Record<string
   const themes = THEMES_FOR[q.cat as Category] ?? DEFAULT_THEMES
   const pool = builtIn.filter((p) => themes.includes(p.theme))
   const list = pool.length ? pool : builtIn.length ? builtIn : photos
-  return list[hash(q.id) % list.length] ?? FALLBACK
+  // Her söz için fotoğraflara sabit bir öncelik sırası verilir ve listedeki en üstteki seçilir.
+  // Böylece bir fotoğraf yüklenemeyip listeden çıktığında yalnızca o fotoğrafı kullanan
+  // sözler değişir; diğer kartların fotoğrafları yerinde kalır.
+  let best: Photo | undefined
+  let bestScore = -1
+  for (const p of list) {
+    const score = hash(`${q.id}|${p.id}`)
+    if (score > bestScore) {
+      bestScore = score
+      best = p
+    }
+  }
+  return best ?? FALLBACK
 }
 
 const FALLBACK: Photo = { id: 'none', theme: 'gunbatimi', src: '', thumb: '' }

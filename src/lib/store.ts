@@ -33,7 +33,7 @@ interface State {
 const KEY = 'momentum:v1'
 /** Uygulamanın eski adıyla (Kıvılcım) kaydedilmiş veriler; ilk açılışta taşınır. */
 const LEGACY_KEY = 'kivilcim:v1'
-const BROKEN_RETRY_MS = 24 * 60 * 60 * 1000
+const BROKEN_RETRY_MS = 7 * 24 * 60 * 60 * 1000
 
 function load(): State {
   const base: State = { favs: [], mine: [], cats: [], hidden: {}, photoFor: {}, broken: {}, seenTips: false, ownPhotos: [] }

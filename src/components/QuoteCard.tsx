@@ -9,6 +9,8 @@ interface Props {
   quote: Quote
   photo: Photo
   active?: boolean
+  /** Fotoğrafta yavaş yakınlaşma efekti. */
+  moving?: boolean
   fav?: boolean
   badge?: string
   canBack?: boolean
@@ -18,11 +20,11 @@ interface Props {
   onPhoto?: () => void
 }
 
-export function QuoteCard({ quote, photo, active, fav, badge, canBack, onBack, onFav, onShare, onPhoto }: Props) {
+export function QuoteCard({ quote, photo, moving = true, fav, badge, canBack, onBack, onFav, onShare, onPhoto }: Props) {
   const cat = useCategoryOf(quote)
   return (
     <article className="card">
-      <PhotoBg key={photo.id} photo={photo} moving={active} />
+      <PhotoBg key={photo.id} photo={photo} moving={moving} />
       <div className="card-shade" />
 
       <div className="card-body">
