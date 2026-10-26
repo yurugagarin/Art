@@ -1,11 +1,23 @@
 import { useRef, useState } from 'react'
+import { CategorySheet } from '../components/CategorySheet'
 import { PhotoGrid } from '../components/PhotoGrid'
-import { CheckIcon, PenIcon, TrashIcon } from '../components/Icons'
+import { CheckIcon, PenIcon, PlusIcon, TrashIcon } from '../components/Icons'
 import { PhotoBg } from '../components/PhotoBg'
 import { QuoteCard } from '../components/QuoteCard'
-import { CATEGORIES, type Category, type Quote } from '../data/quotes'
+import type { Quote } from '../data/quotes'
+import { useCategories } from '../lib/categories'
 import { findPhoto, photoForQuote, usePhotos } from '../lib/photos'
-import { addMine, exportBackup, importBackup, removeMine, setPhotoFor, updateMine, useStore } from '../lib/store'
+import {
+  addMine,
+  exportBackup,
+  importBackup,
+  removeCategory,
+  removeMine,
+  setPhotoFor,
+  updateMine,
+  useStore,
+  type CustomCategory,
+} from '../lib/store'
 import { toast } from '../lib/toast'
 
 const WHO = ['Kendim', 'Koçum', 'Annem', 'Babam', 'Bir arkadaşım', 'Sevgilim']
@@ -13,7 +25,7 @@ const WHO = ['Kendim', 'Koçum', 'Annem', 'Babam', 'Bir arkadaşım', 'Sevgilim'
 interface Draft {
   text: string
   author: string
-  cat: Category
+  cat: Quote['cat']
   photo?: string
 }
 
@@ -23,6 +35,9 @@ export function Compose({ onSaved }: { onSaved: (id: string) => void }) {
   const mine = useStore((s) => s.mine)
   const photoFor = useStore((s) => s.photoFor)
   const photos = usePhotos()
+  const cats = useCategories()
+  const customCats = useStore((s) => s.cats)
+  const [catSheet, setCatSheet] = useState<{ editing: CustomCategory | null } | null>(null)
   const [draft, setDraft] = useState<Draft>(EMPTY)
   const [editing, setEditing] = useState<string | null>(null)
   const top = useRef<HTMLDivElement>(null)
@@ -67,7 +82,7 @@ export function Compose({ onSaved }: { onSaved: (id: string) => void }) {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `kivilcim-yedek-${new Date().toISOString().slice(0, 10)}.json`
+    a.download = `momentum-yedek-${new Date().toISOString().slice(0, 10)}.json`
     a.click()
     setTimeout(() => URL.revokeObjectURL(url), 2000)
   }
@@ -124,11 +139,14 @@ export function Compose({ onSaved }: { onSaved: (id: string) => void }) {
         <div className="field">
           <span className="field-label">Kategori</span>
           <div className="mini-chips">
-            {CATEGORIES.map((c) => (
+            {cats.map((c) => (
               <button key={c.id} className={`mini-chip${draft.cat === c.id ? ' on' : ''}`} onClick={() => setDraft({ ...draft, cat: c.id })}>
                 {c.emoji} {c.label}
               </button>
             ))}
+            <button className="mini-chip mini-chip-add" onClick={() => setCatSheet({ editing: null })}>
+              <PlusIcon width={15} height={15} /> Yeni kategori
+            </button>
           </div>
         </div>
 
@@ -185,6 +203,53 @@ export function Compose({ onSaved }: { onSaved: (id: string) => void }) {
           </ul>
         </div>
       )}
+
+      {customCats.length > 0 && (
+        <div className="mine">
+          <h2 className="section-title">Kategorilerim · {customCats.length}</h2>
+          <ul className="mine-list">
+            {customCats.map((c) => {
+              const count = mine.filter((q) => q.cat === c.id).length
+              return (
+                <li key={c.id} className="mine-row cat-row">
+                  <span className="cat-emoji">{c.emoji}</span>
+                  <div className="mine-text">
+                    <p>{c.label}</p>
+                    <span>{count ? `${count} söz` : 'Henüz söz yok'}</span>
+                  </div>
+                  <button className="icon-btn" aria-label="Kategoriyi düzenle" onClick={() => setCatSheet({ editing: c })}>
+                    <PenIcon width={20} height={20} />
+                  </button>
+                  <button
+                    className="icon-btn"
+                    aria-label="Kategoriyi sil"
+                    onClick={() => {
+                      const msg = count
+                        ? `"${c.label}" silinsin mi? İçindeki ${count} söz "Kendine Hatırlat"a taşınacak.`
+                        : `"${c.label}" silinsin mi?`
+                      if (confirm(msg)) {
+                        removeCategory(c.id)
+                        if (draft.cat === c.id) setDraft({ ...draft, cat: 'hatirlat' })
+                      }
+                    }}
+                  >
+                    <TrashIcon width={20} height={20} />
+                  </button>
+                </li>
+              )
+            })}
+          </ul>
+        </div>
+      )}
+
+      <CategorySheet
+        open={!!catSheet}
+        editing={catSheet?.editing}
+        onClose={() => setCatSheet(null)}
+        onSaved={(c) => {
+          if (!catSheet?.editing) setDraft((d) => ({ ...d, cat: c.id as Quote['cat'] }))
+        }}
+      />
 
       <footer className="backup">
         <p>Sözlerin, favorilerin ve fotoğrafların yalnızca bu telefonda saklanır. Arada bir yedek almak iyi fikir.</p>

@@ -1,30 +1,39 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Quote } from '../data/quotes'
 import { mod, shareQuote } from '../lib/deck'
-import { photoForQuote, preload, usePhotos } from '../lib/photos'
-import { addFav, setPhotoFor, toggleFav, useStore } from '../lib/store'
+import { preload } from '../lib/imageCache'
+import { photoForQuote, usePhotos } from '../lib/photos'
+import { addFav, hideQuote, setPhotoFor, toggleFav, unhideQuote, useStore } from '../lib/store'
 import { toast } from '../lib/toast'
 import { burstHeart } from './HeartBurst'
 import { PhotoGrid } from './PhotoGrid'
 import { QuoteCard } from './QuoteCard'
 import { Sheet } from './Sheet'
-import { SwipeDeck } from './SwipeDeck'
+import { SwipeDeck, type DeckHandle, type SwipeDir } from './SwipeDeck'
 
 interface Props {
   quotes: Quote[]
-  index: number
-  onIndex: (i: number) => void
+  currentId?: string
+  onCurrent: (id: string) => void
+  /** 'feed': sağa = tekrar gör, sola = akıştan çıkar. 'browse': sadece gezinme (favoriler). */
+  mode: 'feed' | 'browse'
   keyboard?: boolean
-  badgeFor?: (q: Quote, i: number) => string | undefined
+  badgeFor?: (q: Quote) => string | undefined
 }
 
-/** Kaydırmalı söz kartları + favori, paylaş ve fotoğraf değiştir eylemleri. */
-export function CardDeck({ quotes, index, onIndex, keyboard, badgeFor }: Props) {
+/** Kaydırmalı söz kartları + favori, paylaş, geri al ve fotoğraf değiştir eylemleri. */
+export function CardDeck({ quotes, currentId, onCurrent, mode, keyboard, badgeFor }: Props) {
   const photos = usePhotos()
   const photoFor = useStore((s) => s.photoFor)
   const favs = useStore((s) => s.favs)
   const [zen, setZen] = useState(false)
   const [picking, setPicking] = useState<Quote | null>(null)
+  const deck = useRef<DeckHandle>(null)
+  const history = useRef<{ id: string; dir: SwipeDir }[]>([])
+  const [historyLen, setHistoryLen] = useState(0)
+
+  const n = quotes.length
+  const index = Math.max(0, quotes.findIndex((q) => q.id === currentId))
 
   // Tek dokunuş: sadece fotoğraf ve söz kalsın (sade görünüm).
   useEffect(() => {
@@ -32,12 +41,46 @@ export function CardDeck({ quotes, index, onIndex, keyboard, badgeFor }: Props) 
     return () => document.documentElement.classList.remove('zen')
   }, [zen])
 
-  // Komşu kartların fotoğraflarını önceden yükle.
+  // Sıradaki kartların fotoğraflarını şimdiden indirip hazırla.
   useEffect(() => {
-    const n = quotes.length
     if (!n) return
-    for (const d of [1, 2, -1]) preload(photoForQuote(quotes[mod(index + d, n)], photos, photoFor).src)
-  }, [index, quotes, photos, photoFor])
+    for (const d of [1, 2, 3, 4, 5, -1]) preload(photoForQuote(quotes[mod(index + d, n)], photos, photoFor).src)
+  }, [index, n, quotes, photos, photoFor])
+
+  const push = (entry: { id: string; dir: SwipeDir }) => {
+    history.current = [...history.current.slice(-49), entry]
+    setHistoryLen(history.current.length)
+  }
+
+  const goBack = useCallback(() => {
+    const last = history.current.pop()
+    setHistoryLen(history.current.length)
+    if (last) {
+      deck.current?.back(last.dir, () => {
+        if (mode === 'feed' && last.dir === 'left') unhideQuote(last.id)
+        onCurrent(last.id)
+      })
+    } else if (mode === 'browse' && n > 1) {
+      const prev = quotes[mod(index - 1, n)]
+      deck.current?.back('left', () => onCurrent(prev.id))
+    }
+  }, [mode, n, quotes, index, onCurrent])
+
+  const onSwipe = (dir: SwipeDir, q: Quote) => {
+    const next = quotes[mod(index + 1, n)]
+    push({ id: q.id, dir })
+    if (mode === 'feed' && dir === 'left') {
+      hideQuote(q.id)
+      toast('Bu söz bir daha gösterilmeyecek', {
+        label: 'Geri al',
+        run: () => {
+          if (history.current.at(-1)?.id === q.id) goBack()
+          else unhideQuote(q.id)
+        },
+      })
+    }
+    if (next && next.id !== q.id) onCurrent(next.id)
+  }
 
   const fav = (q: Quote) => {
     const on = toggleFav(q.id)
@@ -51,12 +94,17 @@ export function CardDeck({ quotes, index, onIndex, keyboard, badgeFor }: Props) 
     if (r === 'failed') toast('Paylaşılamadı')
   }
 
+  const canBack = mode === 'browse' ? n > 1 : historyLen > 0
+
   return (
     <>
       <SwipeDeck
+        ref={deck}
         items={quotes}
         index={index}
-        onIndex={onIndex}
+        mode={mode}
+        onSwipe={onSwipe}
+        onBack={goBack}
         keyboard={keyboard && !picking}
         onTap={() => setZen((z) => !z)}
         onDoubleTap={(q, p) => {
@@ -70,7 +118,9 @@ export function CardDeck({ quotes, index, onIndex, keyboard, badgeFor }: Props) 
             photo={photoForQuote(q, photos, photoFor)}
             active={active}
             fav={favs.includes(q.id)}
-            badge={badgeFor?.(q, quotes.indexOf(q))}
+            badge={badgeFor?.(q)}
+            canBack={active && canBack}
+            onBack={goBack}
             onFav={() => fav(q)}
             onShare={() => share(q)}
             onPhoto={() => setPicking(q)}

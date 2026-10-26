@@ -1,23 +1,34 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { useMemo, useState } from 'react'
 import { CardDeck } from '../components/CardDeck'
-import { CloseIcon, HeartIcon, SparkIcon } from '../components/Icons'
+import { CloseIcon, EyeIcon, HeartIcon, MomentumMark, RepeatIcon } from '../components/Icons'
 import { PhotoBg } from '../components/PhotoBg'
+import { Sheet } from '../components/Sheet'
+import type { Quote } from '../data/quotes'
 import { hash, photoForQuote, usePhotos } from '../lib/photos'
-import { toggleFav, useStore } from '../lib/store'
+import { toggleFav, unhideMany, unhideQuote, useStore } from '../lib/store'
 import { toast } from '../lib/toast'
 import { useQuoteMap } from '../lib/useQuotes'
-import type { Quote } from '../data/quotes'
 
 const RATIOS = ['3 / 4', '4 / 5', '2 / 3', '4 / 5', '1 / 1', '3 / 4']
 
 export function Favorites({ onExplore }: { onExplore: () => void }) {
   const favIds = useStore((s) => s.favs)
+  const hiddenMap = useStore((s) => s.hidden)
   const photoFor = useStore((s) => s.photoFor)
   const map = useQuoteMap()
   const photos = usePhotos()
   const favs = useMemo(() => favIds.map((id) => map.get(id)).filter((q): q is Quote => !!q), [favIds, map])
-  const [open, setOpen] = useState<number | null>(null)
+  const hidden = useMemo(
+    () =>
+      Object.entries(hiddenMap)
+        .sort((a, b) => b[1] - a[1])
+        .map(([id]) => map.get(id))
+        .filter((q): q is Quote => !!q),
+    [hiddenMap, map],
+  )
+  const [openId, setOpenId] = useState<string | null>(null)
+  const [showHidden, setShowHidden] = useState(false)
   // Görüntüleyici açıkken liste değişirse (favoriden çıkarma) kartlar yerinde kalsın.
   const [frozen, setFrozen] = useState(favs)
 
@@ -42,7 +53,7 @@ export function Favorites({ onExplore }: { onExplore: () => void }) {
           <p className="empty-title">Henüz favorin yok</p>
           <p>Sevdiğin bir söze iki kez dokun ya da kalbe bas; burada birikmeye başlasın.</p>
           <button className="btn-primary" onClick={onExplore}>
-            <SparkIcon /> Sözlere göz at
+            <MomentumMark /> Sözlere göz at
           </button>
         </div>
       ) : (
@@ -56,7 +67,7 @@ export function Favorites({ onExplore }: { onExplore: () => void }) {
               transition={{ delay: Math.min(i * 0.04, 0.4) }}
               onClick={() => {
                 setFrozen(favs)
-                setOpen(i)
+                setOpenId(q.id)
               }}
               style={{ aspectRatio: RATIOS[hash(q.id) % RATIOS.length] }}
             >
@@ -81,8 +92,43 @@ export function Favorites({ onExplore }: { onExplore: () => void }) {
         </div>
       )}
 
+      {hidden.length > 0 && (
+        <button className="hidden-link" onClick={() => setShowHidden(true)}>
+          <EyeIcon width={20} height={20} />
+          <span>
+            Akıştan çıkardığın sözler <b>{hidden.length}</b>
+          </span>
+        </button>
+      )}
+
+      <Sheet open={showHidden} title="Akıştan çıkardıkların" onClose={() => setShowHidden(false)}>
+        <p className="sheet-note">Sola kaydırdığın sözler burada. Geri getirdiklerin akışta yeniden karşına çıkar.</p>
+        <ul className="hidden-list">
+          {hidden.map((q) => (
+            <li key={q.id}>
+              <p>{q.text}</p>
+              <button className="mini-chip" onClick={() => unhideQuote(q.id)}>
+                <RepeatIcon width={14} height={14} /> Geri getir
+              </button>
+            </li>
+          ))}
+        </ul>
+        {hidden.length > 1 && (
+          <button
+            className="btn-ghost wide"
+            onClick={() => {
+              unhideMany(hidden.map((q) => q.id))
+              setShowHidden(false)
+              toast('Hepsi akışa geri döndü')
+            }}
+          >
+            Hepsini geri getir
+          </button>
+        )}
+      </Sheet>
+
       <AnimatePresence>
-        {open !== null && frozen.length > 0 && (
+        {openId !== null && frozen.length > 0 && (
           <motion.div
             className="viewer"
             initial={{ opacity: 0, scale: 0.96 }}
@@ -90,8 +136,8 @@ export function Favorites({ onExplore }: { onExplore: () => void }) {
             exit={{ opacity: 0, scale: 0.96 }}
             transition={{ duration: 0.25 }}
           >
-            <CardDeck quotes={frozen} index={open} onIndex={setOpen} keyboard />
-            <button className="viewer-close icon-btn glass" onClick={() => setOpen(null)} aria-label="Kapat">
+            <CardDeck quotes={frozen} currentId={openId} onCurrent={setOpenId} mode="browse" keyboard />
+            <button className="viewer-close icon-btn glass" onClick={() => setOpenId(null)} aria-label="Kapat">
               <CloseIcon />
             </button>
           </motion.div>

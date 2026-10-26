@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import { THEME_GRADIENTS, type Photo } from '../data/photos'
+import { isLoaded, markLoaded } from '../lib/imageCache'
 import { markBroken } from '../lib/store'
-
-const loadedSrcs = new Set<string>()
 
 interface Props {
   photo: Photo
@@ -13,8 +12,14 @@ interface Props {
 
 export function PhotoBg({ photo, moving, thumb }: Props) {
   const src = thumb ? photo.thumb : photo.src
-  const [loaded, setLoaded] = useState(() => loadedSrcs.has(src))
-  const instant = loadedSrcs.has(src)
+  // Önceden yüklenmiş fotoğraf geçişsiz, anında görünür.
+  const [instant] = useState(() => isLoaded(src))
+  const [loaded, setLoaded] = useState(instant)
+
+  const done = () => {
+    markLoaded(src)
+    setLoaded(true)
+  }
 
   return (
     <div className="photo" style={{ background: THEME_GRADIENTS[photo.theme] }}>
@@ -24,18 +29,12 @@ export function PhotoBg({ photo, moving, thumb }: Props) {
           src={src}
           alt=""
           draggable={false}
-          decoding="async"
+          decoding={instant ? 'sync' : 'async'}
           className={`photo-img${loaded ? ' on' : ''}${instant ? ' instant' : ''}${moving ? ' kb' : ''}`}
           ref={(img) => {
-            if (img?.complete && img.naturalWidth > 0 && !loaded) {
-              loadedSrcs.add(src)
-              setLoaded(true)
-            }
+            if (img?.complete && img.naturalWidth > 0 && !loaded) done()
           }}
-          onLoad={() => {
-            loadedSrcs.add(src)
-            setLoaded(true)
-          }}
+          onLoad={done}
           onError={() => markBroken(photo.id)}
         />
       )}

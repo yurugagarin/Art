@@ -1,6 +1,9 @@
+import { useMemo } from 'react'
 import { PHOTOS, type Photo, type PhotoTheme } from '../data/photos'
 import type { Category, Quote } from '../data/quotes'
 import { useStore } from './store'
+
+const DEFAULT_THEMES: PhotoTheme[] = ['yaz', 'arkadas', 'deniz', 'gunbatimi']
 
 const THEMES_FOR: Record<Category, PhotoTheme[]> = {
   spor: ['spor', 'deniz', 'gunbatimi'],
@@ -23,8 +26,10 @@ export function hash(s: string): number {
 export function usePhotos(): Photo[] {
   const own = useStore((s) => s.ownPhotos)
   const broken = useStore((s) => s.broken)
-  const ownPhotos: Photo[] = own.map((p) => ({ id: p.id, theme: 'yaz', src: p.url, thumb: p.url, own: true }))
-  return [...ownPhotos, ...PHOTOS.filter((p) => !broken[p.id])]
+  return useMemo(() => {
+    const ownPhotos: Photo[] = own.map((p) => ({ id: p.id, theme: 'yaz', src: p.url, thumb: p.url, own: true }))
+    return [...ownPhotos, ...PHOTOS.filter((p) => !broken[p.id])]
+  }, [own, broken])
 }
 
 export function findPhoto(id: string | undefined, photos: Photo[]): Photo | undefined {
@@ -36,21 +41,13 @@ export function photoForQuote(q: Quote, photos: Photo[], photoFor: Record<string
   const chosen = findPhoto(photoFor[q.id], photos) ?? findPhoto(q.photo, photos)
   if (chosen) return chosen
   const builtIn = photos.filter((p) => !p.own)
-  const pool = builtIn.filter((p) => THEMES_FOR[q.cat].includes(p.theme))
+  const themes = THEMES_FOR[q.cat as Category] ?? DEFAULT_THEMES
+  const pool = builtIn.filter((p) => themes.includes(p.theme))
   const list = pool.length ? pool : builtIn.length ? builtIn : photos
   return list[hash(q.id) % list.length] ?? FALLBACK
 }
 
 const FALLBACK: Photo = { id: 'none', theme: 'gunbatimi', src: '', thumb: '' }
-
-const preloaded = new Set<string>()
-export function preload(src: string) {
-  if (!src || preloaded.has(src)) return
-  preloaded.add(src)
-  const img = new Image()
-  img.decoding = 'async'
-  img.src = src
-}
 
 /** Fotoğrafı telefonda saklamadan önce küçültür ve JPEG'e çevirir. */
 export async function compressImage(file: File, maxSide = 1440): Promise<Blob> {

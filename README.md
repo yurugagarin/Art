@@ -1,16 +1,21 @@
-# Kıvılcım ✦
+# Momentum
 
 Motivasyonun düştüğünde açıp bakacağın kişisel söz uygulaması. Tam ekran yaz fotoğrafları, üstünde seni harekete geçiren sözler, favoriler ve kendi yazdığın notlar.
 
 ## Neler var?
 
-- **Akış:** Her gün farklı sırayla gelen sözler. Sola kaydırınca sonraki söze, sağa kaydırınca öncekine geçersin. Bilgisayarda ← → tuşları da çalışır.
+- **Akış:** Her gün farklı sırayla gelen 150'den fazla söz.
+  - **Sağa kaydır:** Söz akışta kalır, ileride yine karşına çıkar.
+  - **Sola kaydır:** Söz bir daha gösterilmez. Yanlışlıkla yaptıysan çıkan bildirimdeki **Geri al**'a ya da kartın sağındaki geri okuna bas. Akıştan çıkardıklarını **Favoriler** sayfasının altından tek tek ya da hepsini birden geri getirebilirsin.
+  - Bilgisayarda: → tekrar gör, ← bir daha gösterme, Backspace geri al.
   - **İki kez dokun:** Söz favorilere eklenir (kalp animasyonuyla).
   - **Bir kez dokun:** Menüler gizlenir, sadece fotoğraf ve söz kalır. Tekrar dokununca geri gelir.
-  - Sağdaki düğmeler: favori, paylaş, **fotoğrafı değiştir**.
-  - Üstteki kategoriler: Spor & Güç, Disiplin, Kendine Hatırlat, Yaz Ruhu, Bilgelik, Benim.
+  - Sağdaki düğmeler: geri al, favori, paylaş, **fotoğrafı değiştir**.
+  - Üstteki kategoriler: kendi kategorilerin, Spor & Güç, Disiplin, Kendine Hatırlat, Yaz Ruhu, Bilgelik, Benim.
+  - Sıradaki kartların fotoğrafları önceden indirilir; kaydırınca arkadaki fotoğraf anında hazırdır.
 - **Favoriler:** Pinterest tarzı ızgarada favori sözlerin. Birine dokununca tam ekran açılır.
 - **Yaz:** Kendi sözünü ekle. Örneğin "O gömleği giydiğinde nasıl hissettiğini hatırla" ya da birinin sana söylediği bir cümle. Kimin söylediğini, kategoriyi ve fotoğrafı seçebilirsin. **Kendi fotoğrafını da telefonundan yükleyebilirsin.**
+- **Kendi kategorilerin:** Yaz ekranında **+ Yeni kategori** ile ad ve simge seçerek kategori oluştur (örneğin "🏋️ Salon"). Akışın üstünde kendi sekmesi olur. Kategorilerini aynı ekranın altından düzenleyip silebilirsin; silinen kategorideki sözler "Kendine Hatırlat"a taşınır.
 - **Yedek:** Yaz sekmesinin en altında yedek alma ve geri yükleme düğmeleri var. Senin sözlerin ve fotoğrafların sadece telefonunda saklanır, bir sunucuya gönderilmez.
 
 ## Telefona uygulama gibi ekleme
@@ -18,7 +23,9 @@ Motivasyonun düştüğünde açıp bakacağın kişisel söz uygulaması. Tam e
 1. Uygulamanın adresini telefonda aç (GitHub Pages adresi aşağıda).
 2. **iPhone (Safari):** Paylaş düğmesi → **Ana Ekrana Ekle**.
    **Android (Chrome):** ⋮ menüsü → **Ana ekrana ekle** / **Uygulamayı yükle**.
-3. Ana ekrandaki **Kıvılcım** ikonundan açtığında tam ekran, uygulama gibi çalışır. Bir kez açtıktan sonra internet olmadan da açılır. Daha önce gördüğün fotoğraflar telefonda önbelleğe alınır.
+3. Ana ekrandaki **Momentum** ikonundan açtığında tam ekran, uygulama gibi çalışır. Bir kez açtıktan sonra internet olmadan da açılır. Daha önce gördüğün fotoğraflar telefonda önbelleğe alınır.
+
+> Uygulamayı eski adıyla (Kıvılcım) ana ekrana eklediysen, eski ikonu silip sayfayı yeniden **Ana Ekrana Ekle** ile eklersen yeni ad ve logo görünür. Favorilerin ve sözlerin kaybolmaz.
 
 ## GitHub Pages ile yayınlama
 
@@ -51,8 +58,8 @@ npm run preview  # derlenmiş hali yerelde dene
 Sözler `src/data/quotes.ts` dosyasında duruyor:
 
 ```ts
-{ id: 's18', cat: 'spor', text: 'Practice makes perfect.', tr: 'Pratik, mükemmelleştirir.', author: 'İngiliz atasözü' },
-{ id: 'h17', cat: 'hatirlat', text: 'Bugün de geldin. Bu yeter.' },
+{ id: 's37', cat: 'spor', text: 'Practice makes perfect.', tr: 'Pratik, mükemmelleştirir.', author: 'İngiliz atasözü' },
+{ id: 'h33', cat: 'hatirlat', text: 'Bugün de geldin. Bu yeter.' },
 ```
 
 - `id`: Benzersiz olmalı (favoriler buna göre tutulur).

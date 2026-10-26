@@ -4,26 +4,41 @@ import { idbDelete, idbGetAll, idbPut } from './idb'
 
 // Tüm kişisel veriler bu telefonda/tarayıcıda saklanır (localStorage + IndexedDB).
 
+export interface CustomCategory {
+  id: string
+  label: string
+  emoji: string
+  createdAt: number
+}
+
 interface State {
   /** Favori söz id'leri, en yeni başta. */
   favs: string[]
   /** Kullanıcının kendi sözleri. */
   mine: Quote[]
+  /** Kullanıcının oluşturduğu kategoriler. */
+  cats: CustomCategory[]
+  /** Sola kaydırılıp akıştan çıkarılan sözler: sözId -> zaman damgası. */
+  hidden: Record<string, number>
   /** Kullanıcının bir söz için seçtiği fotoğraf: sözId -> fotoğrafId. */
   photoFor: Record<string, string>
   /** Yüklenemeyen fotoğraflar: fotoğrafId -> zaman damgası. */
   broken: Record<string, number>
+  /** Kaydırma ipuçları gösterildi mi? */
+  seenTips: boolean
   /** Kullanıcının yüklediği fotoğraflar: id -> objectURL. */
   ownPhotos: { id: string; url: string; createdAt: number }[]
 }
 
-const KEY = 'kivilcim:v1'
+const KEY = 'momentum:v1'
+/** Uygulamanın eski adıyla (Kıvılcım) kaydedilmiş veriler; ilk açılışta taşınır. */
+const LEGACY_KEY = 'kivilcim:v1'
 const BROKEN_RETRY_MS = 24 * 60 * 60 * 1000
 
 function load(): State {
-  const base: State = { favs: [], mine: [], photoFor: {}, broken: {}, ownPhotos: [] }
+  const base: State = { favs: [], mine: [], cats: [], hidden: {}, photoFor: {}, broken: {}, seenTips: false, ownPhotos: [] }
   try {
-    const raw = localStorage.getItem(KEY)
+    const raw = localStorage.getItem(KEY) ?? localStorage.getItem(LEGACY_KEY)
     if (!raw) return base
     const saved = JSON.parse(raw) as Partial<State>
     const now = Date.now()
@@ -41,8 +56,8 @@ const listeners = new Set<() => void>()
 
 function persist() {
   try {
-    const { favs, mine, photoFor, broken } = state
-    localStorage.setItem(KEY, JSON.stringify({ favs, mine, photoFor, broken }))
+    const { ownPhotos: _, ...rest } = state
+    localStorage.setItem(KEY, JSON.stringify(rest))
   } catch {
     /* depolama dolu ya da kapalı olabilir; uygulama yine çalışır */
   }
@@ -66,6 +81,10 @@ export function useStore<T>(select: (s: State) => T): T {
 
 export const getState = () => state
 
+export function markTipsSeen() {
+  if (!state.seenTips) set({ seenTips: true })
+}
+
 // ——— Favoriler ———
 export function isFav(id: string) {
   return state.favs.includes(id)
@@ -81,6 +100,24 @@ export function addFav(id: string) {
   if (!isFav(id)) set({ favs: [id, ...state.favs] })
 }
 
+// ——— Akıştan çıkarılanlar (sola kaydırma) ———
+export function hideQuote(id: string) {
+  set({ hidden: { ...state.hidden, [id]: Date.now() } })
+}
+
+export function unhideQuote(id: string) {
+  if (!state.hidden[id]) return
+  const hidden = { ...state.hidden }
+  delete hidden[id]
+  set({ hidden })
+}
+
+export function unhideMany(ids: string[]) {
+  const hidden = { ...state.hidden }
+  ids.forEach((id) => delete hidden[id])
+  set({ hidden })
+}
+
 // ——— Kendi sözlerim ———
 export function addMine(q: Omit<Quote, 'id' | 'mine' | 'createdAt'>): Quote {
   const quote: Quote = { ...q, id: `m-${Date.now().toString(36)}`, mine: true, createdAt: Date.now() }
@@ -93,9 +130,31 @@ export function updateMine(id: string, patch: Partial<Quote>) {
 }
 
 export function removeMine(id: string) {
+  const hidden = { ...state.hidden }
+  delete hidden[id]
   set({
     mine: state.mine.filter((q) => q.id !== id),
     favs: state.favs.filter((f) => f !== id),
+    hidden,
+  })
+}
+
+// ——— Kendi kategorilerim ———
+export function addCategory(label: string, emoji: string): CustomCategory {
+  const cat: CustomCategory = { id: `c-${Date.now().toString(36)}`, label, emoji, createdAt: Date.now() }
+  set({ cats: [...state.cats, cat] })
+  return cat
+}
+
+export function updateCategory(id: string, patch: Partial<Pick<CustomCategory, 'label' | 'emoji'>>) {
+  set({ cats: state.cats.map((c) => (c.id === id ? { ...c, ...patch } : c)) })
+}
+
+/** Kategoriyi siler; içindeki sözler "Kendine Hatırlat"a taşınır. */
+export function removeCategory(id: string) {
+  set({
+    cats: state.cats.filter((c) => c.id !== id),
+    mine: state.mine.map((q) => (q.cat === id ? { ...q, cat: 'hatirlat' } : q)),
   })
 }
 
@@ -140,10 +199,13 @@ export async function removeOwnPhoto(id: string) {
 
 // ——— Yedekleme ———
 interface Backup {
-  app: 'kivilcim'
+  /** Eski yedekler "kivilcim" olarak işaretli; onlar da geri yüklenebilir. */
+  app: 'momentum' | 'kivilcim'
   version: 1
   favs: string[]
   mine: Quote[]
+  cats?: CustomCategory[]
+  hidden?: Record<string, number>
   photoFor: Record<string, string>
   photos: { id: string; createdAt: number; dataUrl: string }[]
 }
@@ -162,10 +224,12 @@ export async function exportBackup(): Promise<Blob> {
     rows.map(async (r) => ({ id: r.id, createdAt: r.createdAt, dataUrl: await blobToDataUrl(r.blob) })),
   )
   const data: Backup = {
-    app: 'kivilcim',
+    app: 'momentum',
     version: 1,
     favs: state.favs,
     mine: state.mine,
+    cats: state.cats,
+    hidden: state.hidden,
     photoFor: state.photoFor,
     photos,
   }
@@ -174,15 +238,18 @@ export async function exportBackup(): Promise<Blob> {
 
 export async function importBackup(file: File): Promise<number> {
   const data = JSON.parse(await file.text()) as Backup
-  if (data.app !== 'kivilcim') throw new Error('Bu dosya bir Kıvılcım yedeği değil.')
+  if (data.app !== 'momentum' && data.app !== 'kivilcim') throw new Error('Bu dosya bir Momentum yedeği değil.')
   for (const p of data.photos ?? []) {
     const blob = await (await fetch(p.dataUrl)).blob()
     await idbPut({ id: p.id, blob, createdAt: p.createdAt })
   }
   const mineIds = new Set(state.mine.map((q) => q.id))
   const newMine = (data.mine ?? []).filter((q) => !mineIds.has(q.id))
+  const catIds = new Set(state.cats.map((c) => c.id))
   set({
     mine: [...newMine, ...state.mine],
+    cats: [...state.cats, ...(data.cats ?? []).filter((c) => !catIds.has(c.id))],
+    hidden: { ...(data.hidden ?? {}), ...state.hidden },
     favs: Array.from(new Set([...state.favs, ...(data.favs ?? [])])),
     photoFor: { ...(data.photoFor ?? {}), ...state.photoFor },
   })

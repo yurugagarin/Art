@@ -6,6 +6,7 @@ export interface PhotoRow {
   createdAt: number
 }
 
+// Uygulamanın eski adıyla kalıyor; değiştirilirse daha önce yüklenen fotoğraflar kaybolur.
 const DB = 'kivilcim'
 const STORE = 'photos'
 

@@ -1,7 +1,8 @@
 import type { Photo } from '../data/photos'
-import { CATEGORIES, type Quote } from '../data/quotes'
+import type { Quote } from '../data/quotes'
+import { useCategoryOf } from '../lib/categories'
 import { sizeClass } from '../lib/deck'
-import { HeartIcon, ImageIcon, ShareIcon } from './Icons'
+import { HeartIcon, ImageIcon, ShareIcon, UndoIcon } from './Icons'
 import { PhotoBg } from './PhotoBg'
 
 interface Props {
@@ -10,18 +11,15 @@ interface Props {
   active?: boolean
   fav?: boolean
   badge?: string
+  canBack?: boolean
+  onBack?: () => void
   onFav?: () => void
   onShare?: () => void
   onPhoto?: () => void
 }
 
-export function categoryLabel(q: Quote) {
-  if (q.mine) return { emoji: '✍️', label: 'Benim sözüm' }
-  return CATEGORIES.find((c) => c.id === q.cat) ?? { emoji: '✦', label: '' }
-}
-
-export function QuoteCard({ quote, photo, active, fav, badge, onFav, onShare, onPhoto }: Props) {
-  const cat = categoryLabel(quote)
+export function QuoteCard({ quote, photo, active, fav, badge, canBack, onBack, onFav, onShare, onPhoto }: Props) {
+  const cat = useCategoryOf(quote)
   return (
     <article className="card">
       <PhotoBg key={photo.id} photo={photo} moving={active} />
@@ -49,6 +47,9 @@ export function QuoteCard({ quote, photo, active, fav, badge, onFav, onShare, on
       </div>
 
       <div className="card-actions">
+        <button className={`act act-small${canBack ? '' : ' act-hidden'}`} onClick={onBack} aria-label="Geri al" tabIndex={canBack ? 0 : -1}>
+          <UndoIcon width={20} height={20} />
+        </button>
         <button className={`act${fav ? ' act-fav' : ''}`} onClick={onFav} aria-label={fav ? 'Favorilerden çıkar' : 'Favorilere ekle'}>
           <HeartIcon filled={fav} />
         </button>

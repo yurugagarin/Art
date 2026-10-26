@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useState } from 'react'
 import { HeartBurstLayer } from './components/HeartBurst'
-import { HeartIcon, PenIcon, SparkIcon } from './components/Icons'
+import { HeartIcon, MomentumMark, PenIcon } from './components/Icons'
 import { Compose } from './screens/Compose'
 import { Favorites } from './screens/Favorites'
 import { Feed } from './screens/Feed'
@@ -10,8 +10,8 @@ import { dismissToast, useToast } from './lib/toast'
 
 type Tab = 'akis' | 'favoriler' | 'yaz'
 
-const TABS: { id: Tab; label: string; Icon: typeof SparkIcon }[] = [
-  { id: 'akis', label: 'Akış', Icon: SparkIcon },
+const TABS: { id: Tab; label: string; Icon: typeof HeartIcon }[] = [
+  { id: 'akis', label: 'Akış', Icon: MomentumMark },
   { id: 'favoriler', label: 'Favoriler', Icon: HeartIcon },
   { id: 'yaz', label: 'Yaz', Icon: PenIcon },
 ]
@@ -59,7 +59,7 @@ export default function App() {
           <button key={id} className={`tab${tab === id ? ' on' : ''}`} onClick={() => setTab(id)} aria-current={tab === id ? 'page' : undefined}>
             {tab === id && <motion.span layoutId="tab-pill" className="tab-pill" transition={{ type: 'spring', stiffness: 500, damping: 38 }} />}
             <span className="tab-inner">
-              <Icon filled={tab === id && id !== 'yaz'} width={20} height={20} />
+              <Icon filled={tab === id && id === 'favoriler'} width={id === 'akis' ? 24 : 20} height={20} />
               <span className="tab-label">{label}</span>
               {id === 'favoriler' && favCount > 0 && tab !== id && <span className="tab-count">{favCount}</span>}
             </span>
