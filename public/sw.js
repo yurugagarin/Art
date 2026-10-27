@@ -1,6 +1,6 @@
 // Momentum service worker: uygulamayı çevrimdışı açılabilir yapar,
 // görülen fotoğrafları telefonda önbelleğe alır.
-const VERSION = 'v5'
+const VERSION = 'v6'
 const SHELL = `momentum-shell-${VERSION}`
 const PHOTOS = 'momentum-photos'
 const MAX_PHOTOS = 160

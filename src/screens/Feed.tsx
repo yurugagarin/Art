@@ -6,12 +6,12 @@ import { BoltIcon, CloseIcon, MomentumMark, PenIcon, RepeatIcon, UndoIcon } from
 import type { Quote } from '../data/quotes'
 import { useCategories } from '../lib/categories'
 import { todayKey } from '../lib/deck'
-import { personalOrder, spreadCategories, tasteOf } from '../lib/personal'
+import { buildSosDeck, personalOrder, spreadCategories, tasteOf, type SosDeck } from '../lib/personal'
 import { getState, markTipsSeen, unhideMany, useStore } from '../lib/store'
 import { MomentumChip } from '../components/Momentum'
-import { useAllQuotes } from '../lib/useQuotes'
+import { useAllQuotes, useQuoteMap } from '../lib/useQuotes'
 
-export type Filter = 'all' | 'mine' | Quote['cat']
+export type Filter = 'all' | 'mine' | 'sos' | Quote['cat']
 
 const POS_KEY = 'momentum:pos'
 
@@ -41,22 +41,42 @@ export function Feed({ focusId, onFocused, onWrite }: Props) {
   const [filter, setFilter] = useState<Filter>(saved.filter)
   const [currentId, setCurrentId] = useState<string | undefined>(saved.id)
   const hasMine = all.some((q) => q.mine)
+  const byId = useQuoteMap()
+  // "Motivasyonum düştü" destesi: girildiği an bir kez hazırlanır, sonra sırası değişmez.
+  const [sos, setSos] = useState<SosDeck | null>(null)
+  const [beforeSos, setBeforeSos] = useState<Filter>('all')
+
+  const enterSos = () => {
+    const st = getState()
+    const d = buildSosDeck(byId, st.mine, st.favs, st.power, st.hidden)
+    navigator.vibrate?.(15)
+    setBeforeSos(filter === 'sos' ? beforeSos : filter)
+    setSos(d)
+    setFilter('sos')
+    setCurrentId(d.list[0]?.id)
+  }
+  const exitSos = () => {
+    setFilter(beforeSos)
+    setCurrentId(undefined)
+  }
 
   // Seçili kategorideki tüm sözler (gizlenenler dahil), sana göre sıralanmış.
   // Sıra oturum boyunca sabit kalır; her kaydırmada yeniden karışmaz.
   const pool = useMemo(() => {
+    if (filter === 'sos') return sos?.list ?? []
     if (filter === 'mine') return all.filter((q) => q.mine)
     const { power, lastPower } = getState()
     const list = filter === 'all' ? all : all.filter((q) => q.cat === filter)
     const ordered = personalOrder(list, power, lastPower, tasteOf(power, all), todayKey())
     return filter === 'all' ? spreadCategories(ordered) : ordered
-  }, [all, filter])
+  }, [all, filter, sos])
   const deck = useMemo(() => pool.filter((q) => !hidden[q.id]), [pool, hidden])
   const hiddenHere = pool.length - deck.length
 
   useEffect(() => {
     try {
-      localStorage.setItem(POS_KEY, JSON.stringify({ day: todayKey(), filter, id: currentId }))
+      // Motivasyon modu kalıcı değil: uygulama yeniden açılınca normal akış gelir.
+      if (filter !== 'sos') localStorage.setItem(POS_KEY, JSON.stringify({ day: todayKey(), filter, id: currentId }))
     } catch {
       /* önemli değil */
     }
@@ -78,20 +98,38 @@ export function Feed({ focusId, onFocused, onWrite }: Props) {
   ]
 
   const firstOfDay = filter === 'all' ? deck[0]?.id : undefined
+  const isSos = filter === 'sos'
   const isCustom = cats.some((c) => c.custom && c.id === filter)
 
   return (
     <section className="screen feed">
       {deck.length > 0 ? (
         <CardDeck
+          // Kategori değişince deste sıfırlanır: geri al geçmişi başka kategoriye taşmaz.
+          key={filter}
           quotes={deck}
           currentId={currentId}
           onCurrent={setCurrentId}
           mode="feed"
           keyboard
           photoOrder={pool}
-          badgeFor={(q) => (q.id === firstOfDay ? 'Günün sözü' : undefined)}
+          hideOnLeft={!isSos}
+          badgeFor={(q) => (isSos ? sos?.why.get(q.id) : q.id === firstOfDay ? 'Günün sözü' : undefined)}
         />
+      ) : isSos ? (
+        <div className="empty empty-feed">
+          <div className="empty-art sos-art">❤️‍🔥</div>
+          <p className="empty-title">Burası henüz boş</p>
+          <p>Sağa kaydırdığın, favorilediğin ya da kendi yazdığın sözler burada toplanır. Motivasyonun düştüğünde tek dokunuşla hepsi karşında olur.</p>
+          <div className="empty-actions">
+            <button className="btn-primary" onClick={onWrite}>
+              <PenIcon /> Kendine bir söz yaz
+            </button>
+            <button className="btn-ghost" onClick={exitSos}>
+              Akışa dön
+            </button>
+          </div>
+        </div>
       ) : hiddenHere > 0 ? (
         <div className="empty empty-feed">
           <p className="empty-title">Hepsini gördün</p>
@@ -118,13 +156,28 @@ export function Feed({ focusId, onFocused, onWrite }: Props) {
           </h1>
           <MomentumChip />
         </div>
-        <nav className="chips" aria-label="Kategoriler">
-          {chips.map((c) => (
-            <button key={c.id} className={`chip${filter === c.id ? ' on' : ''}`} onClick={() => choose(c.id)}>
-              {c.label}
+        {isSos ? (
+          <div className="sos-bar">
+            <span className="sos-title">
+              <span aria-hidden>❤️‍🔥</span> Sana iyi gelenler
+              {deck.length > 0 && <span className="sos-count">{deck.length}</span>}
+            </span>
+            <button className="sos-close" onClick={exitSos} aria-label="Motivasyon modundan çık">
+              <CloseIcon width={16} height={16} /> Kapat
             </button>
-          ))}
-        </nav>
+          </div>
+        ) : (
+          <nav className="chips" aria-label="Kategoriler">
+            <button className="chip chip-sos" onClick={enterSos}>
+              ❤️‍🔥 Motivasyonum düştü
+            </button>
+            {chips.map((c) => (
+              <button key={c.id} className={`chip${filter === c.id ? ' on' : ''}`} onClick={() => choose(c.id)}>
+                {c.label}
+              </button>
+            ))}
+          </nav>
+        )}
       </header>
 
       {createPortal(<AnimatePresence>{!seenTips && deck.length > 0 && <Tips />}</AnimatePresence>, document.body)}

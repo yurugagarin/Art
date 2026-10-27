@@ -35,6 +35,8 @@ interface Props<T> {
   onTap?: () => void
   /** 'feed': sağa = tekrar gör, sola = bir daha gösterme. 'browse': iki yön de sonraki karta geçer. */
   mode: 'feed' | 'browse'
+  /** Akış modunda sola kaydırmanın etiketi (varsayılan: "Bir daha gösterme"). */
+  leftLabel?: string
   keyboard?: boolean
   ref?: Ref<DeckHandle>
 }
@@ -59,6 +61,7 @@ export function SwipeDeck<T extends { id: string }>({
   onDoubleTap,
   onTap,
   mode,
+  leftLabel = 'Bir daha gösterme',
   keyboard,
   ref,
 }: Props<T>) {
@@ -257,11 +260,11 @@ export function SwipeDeck<T extends { id: string }>({
         )
       })}
 
-      {mode === 'feed' && <Stamps x={x} />}
+      {mode === 'feed' && <Stamps x={x} leftLabel={leftLabel} />}
 
       {mode === 'feed' ? (
         <>
-          <button className="deck-nav deck-prev" onClick={() => swipe('left')} aria-label="Bir daha gösterme" title="Bir daha gösterme (←)">
+          <button className="deck-nav deck-prev" onClick={() => swipe('left')} aria-label={leftLabel} title={`${leftLabel} (←)`}>
             <CloseIcon />
           </button>
           <button className="deck-nav deck-next" onClick={() => swipe('right')} aria-label="Güç aldım" title="Güç aldım (→)">
@@ -285,7 +288,7 @@ export function SwipeDeck<T extends { id: string }>({
 }
 
 /** Sürüklerken beliren etiketler: sağa "Güç aldım", sola "Bir daha gösterme". */
-function Stamps({ x }: { x: MotionValue<number> }) {
+function Stamps({ x, leftLabel }: { x: MotionValue<number>; leftLabel: string }) {
   const keep = useTransform(x, [20, 110], [0, 1])
   const drop = useTransform(x, [-110, -20], [1, 0])
   const keepScale = useTransform(x, [20, 110], [0.85, 1])
@@ -296,7 +299,7 @@ function Stamps({ x }: { x: MotionValue<number> }) {
         <BoltIcon width={18} height={18} filled /> Güç aldım
       </motion.div>
       <motion.div className="stamp stamp-drop" style={{ opacity: drop, scale: dropScale, rotate: 9 }}>
-        <CloseIcon width={18} height={18} /> Bir daha gösterme
+        <CloseIcon width={18} height={18} /> {leftLabel}
       </motion.div>
     </div>
   )

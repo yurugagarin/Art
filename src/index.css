@@ -182,6 +182,80 @@ button:disabled {
   color: var(--dark-ink);
 }
 
+/* "Motivasyonum düştü" düğmesi ve modu */
+.chip-sos {
+  border-color: transparent;
+  background:
+    linear-gradient(rgba(30, 14, 20, 0.55), rgba(30, 14, 20, 0.55)) padding-box,
+    var(--grad) border-box;
+  border: 1.5px solid transparent;
+  color: #ffd9c4;
+  box-shadow: 0 4px 18px rgba(255, 111, 145, 0.28);
+}
+
+.sos-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 12px 22px 6px;
+  padding: 6px 6px 6px 16px;
+  border-radius: 999px;
+  border: 1.5px solid transparent;
+  background:
+    linear-gradient(rgba(30, 14, 20, 0.62), rgba(30, 14, 20, 0.62)) padding-box,
+    var(--grad) border-box;
+  backdrop-filter: blur(14px) saturate(1.4);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  pointer-events: auto;
+}
+
+.sos-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14.5px;
+  font-weight: 800;
+}
+
+.sos-count {
+  min-width: 22px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--grad);
+  color: var(--dark-ink);
+  font-size: 12px;
+  text-align: center;
+}
+
+.sos-close {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.sos-art {
+  font-size: 40px;
+}
+
+.empty-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.empty-actions .btn-primary {
+  margin-top: 0;
+}
+
 /* ——— Momentum sayacı ——— */
 .mchip {
   position: relative;

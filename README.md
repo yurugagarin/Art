@@ -13,6 +13,7 @@ Motivasyonun düştüğünde açıp bakacağın kişisel söz uygulaması. Tam e
   - Sağdaki düğmeler: geri al, favori, paylaş, **fotoğrafı değiştir**.
   - Üstteki kategoriler: kendi kategorilerin, Spor & Güç, Disiplin, Başarı, Cesaret, Kendine Hatırlat, Yaz Ruhu, Bilgelik, Benim.
   - Sıradaki kartların fotoğrafları önceden indirilir; kaydırınca arkadaki fotoğraf anında hazırdır.
+- **❤️‍🔥 Motivasyonum düştü:** Akışta kategorilerin en başındaki düğme. Dokununca sadece sana iyi gelenler gelir: kendi yazdığın sözler, favorilerin ve en çok güç aldığın sözler, sırayla karışık. Her kartta neden orada olduğu yazar (♥ Favorin, ⚡ 5 kez güç verdi…). Bu modda sola kaydırmak sözü gizlemez, sadece sıradakine geçer; sağa kaydırmak yine güç kazandırır. Üstteki **Kapat** ile normal akışa dönersin.
 - **Momentum:** Sağ üstteki sayaç bugünkü gücünü (günlük hedef 10) ve kaç gündür hedefi tutturduğunu (🔥 seri) gösterir. Dokununca son 7 gün, sana en çok güç veren kategoriler, yazarlar ve sözler açılır.
 - **Favoriler:** Pinterest tarzı ızgarada favori sözlerin. Birine dokununca tam ekran açılır. Favorilediğin her sözün kopyası saklanır; söz ileride listeden çıkarılsa da favorilerinde kalır.
 - **Yaz:** Kendi sözünü ekle. Örneğin "O gömleği giydiğinde nasıl hissettiğini hatırla" ya da birinin sana söylediği bir cümle. Kimin söylediğini, kategoriyi ve fotoğrafı seçebilirsin. **Kendi fotoğrafını da telefonundan yükleyebilirsin.**

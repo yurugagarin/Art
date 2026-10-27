@@ -25,10 +25,12 @@ interface Props {
    * Akışta gizlenenler dahil tüm liste verilir ki bir söz gizlenince diğerlerinin fotoğrafı değişmesin.
    */
   photoOrder?: Quote[]
+  /** Akış modunda sola kaydırınca söz gizlensin mi? (Motivasyon modunda sadece sıradakine geçer.) */
+  hideOnLeft?: boolean
 }
 
 /** Kaydırmalı söz kartları + favori, paylaş, geri al ve fotoğraf değiştir eylemleri. */
-export function CardDeck({ quotes, currentId, onCurrent, mode, keyboard, badgeFor, photoOrder }: Props) {
+export function CardDeck({ quotes, currentId, onCurrent, mode, keyboard, badgeFor, photoOrder, hideOnLeft = true }: Props) {
   const photos = usePhotos()
   const photoFor = useStore((s) => s.photoFor)
   const favs = useStore((s) => s.favs)
@@ -81,7 +83,7 @@ export function CardDeck({ quotes, currentId, onCurrent, mode, keyboard, badgeFo
     setHistoryLen(history.current.length)
     if (last) {
       deck.current?.back(last.dir, last.id, () => {
-        if (mode === 'feed' && last.dir === 'left') unhideQuote(last.id)
+        if (mode === 'feed' && hideOnLeft && last.dir === 'left') unhideQuote(last.id)
         if (mode === 'feed' && last.dir === 'right') undoPower(last.id)
         onCurrent(last.id)
       })
@@ -89,13 +91,13 @@ export function CardDeck({ quotes, currentId, onCurrent, mode, keyboard, badgeFo
       const prev = quotes[mod(index - 1, n)]
       deck.current?.back('left', prev.id, () => onCurrent(prev.id))
     }
-  }, [mode, n, quotes, index, onCurrent])
+  }, [mode, n, quotes, index, onCurrent, hideOnLeft])
 
   const onSwipe = (dir: SwipeDir, q: Quote) => {
     const next = quotes[mod(index + 1, n)]
     push({ id: q.id, dir })
     // Bildirim yok: yanlışlıkla atılan söz, kartın sağındaki geri okuyla geri gelir.
-    if (mode === 'feed' && dir === 'left') hideQuote(q.id)
+    if (mode === 'feed' && hideOnLeft && dir === 'left') hideQuote(q.id)
     // Sağa = "güç aldım": Momentum'a eklenir, akış zevkine göre şekillenir.
     if (mode === 'feed' && dir === 'right') {
       const goal = addPower(q.id)
@@ -129,6 +131,7 @@ export function CardDeck({ quotes, currentId, onCurrent, mode, keyboard, badgeFo
         items={quotes}
         index={index}
         mode={mode}
+        leftLabel={hideOnLeft ? undefined : 'Sonraki'}
         onSwipe={onSwipe}
         onBack={goBack}
         keyboard={keyboard && !picking}

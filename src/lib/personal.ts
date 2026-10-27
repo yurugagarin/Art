@@ -72,3 +72,56 @@ export function spreadCategories(list: Quote[], maxRun = 2, lookahead = 12): Quo
   }
   return out
 }
+
+export interface SosDeck {
+  list: Quote[]
+  /** Kartın üstünde görünecek "neden burada" etiketi. */
+  why: Map<string, string>
+}
+
+/**
+ * "Motivasyonum düştü" destesi: kendi sözlerin, favorilerin ve en çok güç aldığın sözler.
+ * Üç grup sırayla karıştırılır (biri senin, biri favori, biri güç verenlerden…) ki hepsi
+ * başta görünsün. Sola kaydırdığın (gizlediğin) sözler gelmez.
+ */
+export function buildSosDeck(
+  byId: Map<string, Quote>,
+  mine: Quote[],
+  favs: string[],
+  power: Record<string, number>,
+  hidden: Record<string, number>,
+): SosDeck {
+  const ok = (q: Quote | undefined): q is Quote => !!q && !hidden[q.id]
+  const own = mine.filter(ok)
+  const fav = favs.map((id) => byId.get(id)).filter(ok)
+  const strong = Object.entries(power)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 60)
+    .map(([id]) => byId.get(id))
+    .filter(ok)
+
+  const groups = [own, fav, strong]
+  const seen = new Set<string>()
+  const list: Quote[] = []
+  for (let i = 0; groups.some((g) => i < g.length); i++) {
+    for (const g of groups) {
+      const q = g[i]
+      if (q && !seen.has(q.id)) {
+        seen.add(q.id)
+        list.push(q)
+      }
+    }
+  }
+
+  const favSet = new Set(favs)
+  const why = new Map<string, string>()
+  for (const q of list) {
+    const parts: string[] = []
+    // Kendi sözünde kategori zaten "Benim sözüm" yazar; sadece kendi kategorisindeyse belirt.
+    if (q.mine && q.cat.startsWith('c-')) parts.push('✍️ Senin sözün')
+    if (favSet.has(q.id)) parts.push('♥ Favorin')
+    if (power[q.id]) parts.push(`⚡ ${power[q.id]} kez güç verdi`)
+    if (parts.length) why.set(q.id, parts.join(' · '))
+  }
+  return { list, why }
+}
