@@ -14,6 +14,14 @@ export interface CustomCategory {
 interface State {
   /** Favori söz id'leri, en yeni başta. */
   favs: string[]
+  /** Favorilenen hazır sözlerin kopyası: söz ileride listeden çıksa da favorilerde kalır. */
+  favQuotes: Record<string, Quote>
+  /** Sağa kaydırma = "güç aldım": sözId -> kaç kez. */
+  power: Record<string, number>
+  /** Sözün en son ne zaman sağa kaydırıldığı (zaman damgası). */
+  lastPower: Record<string, number>
+  /** Günlük güç sayısı: "yyyy-a-g" -> o gün kaç söz sağa kaydırıldı. */
+  days: Record<string, number>
   /** Kullanıcının kendi sözleri. */
   mine: Quote[]
   /** Kullanıcının oluşturduğu kategoriler. */
@@ -36,7 +44,7 @@ const LEGACY_KEY = 'kivilcim:v1'
 const BROKEN_RETRY_MS = 7 * 24 * 60 * 60 * 1000
 
 function load(): State {
-  const base: State = { favs: [], mine: [], cats: [], hidden: {}, photoFor: {}, broken: {}, seenTips: false, ownPhotos: [] }
+  const base: State = { favs: [], favQuotes: {}, power: {}, lastPower: {}, days: {}, mine: [], cats: [], hidden: {}, photoFor: {}, broken: {}, seenTips: false, ownPhotos: [] }
   try {
     const raw = localStorage.getItem(KEY) ?? localStorage.getItem(LEGACY_KEY)
     if (!raw) return base
@@ -90,14 +98,62 @@ export function isFav(id: string) {
   return state.favs.includes(id)
 }
 
-export function toggleFav(id: string): boolean {
-  const on = !isFav(id)
-  set({ favs: on ? [id, ...state.favs] : state.favs.filter((f) => f !== id) })
+function snapshot(q: Quote): Record<string, Quote> {
+  if (q.mine) return state.favQuotes
+  const { text, tr, author, note, cat, id } = q
+  return { ...state.favQuotes, [id]: { id, text, tr, author, note, cat } }
+}
+
+export function toggleFav(q: Quote): boolean {
+  const on = !isFav(q.id)
+  set({
+    favs: on ? [q.id, ...state.favs] : state.favs.filter((f) => f !== q.id),
+    favQuotes: on ? snapshot(q) : state.favQuotes,
+  })
   return on
 }
 
-export function addFav(id: string) {
-  if (!isFav(id)) set({ favs: [id, ...state.favs] })
+export function addFav(q: Quote) {
+  if (!isFav(q.id)) set({ favs: [q.id, ...state.favs], favQuotes: snapshot(q) })
+}
+
+// ——— Güç (sağa kaydırma) ve Momentum serisi ———
+/** Günlük hedef: bu kadar söz sağa kaydırılınca gün "tamamlanır" ve seri devam eder. */
+export const DAILY_GOAL = 10
+
+export const dayKey = (d = new Date()) => `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`
+
+/** Sağa kaydırılan sözü kaydeder. Günlük hedefe bu kaydırmayla ulaşıldıysa true döner. */
+export function addPower(id: string): boolean {
+  const today = dayKey()
+  const n = (state.days[today] ?? 0) + 1
+  set({
+    power: { ...state.power, [id]: (state.power[id] ?? 0) + 1 },
+    lastPower: { ...state.lastPower, [id]: Date.now() },
+    days: { ...state.days, [today]: n },
+  })
+  return n === DAILY_GOAL
+}
+
+/** Geri alınan sağa kaydırmanın gücünü geri düşer. */
+export function undoPower(id: string) {
+  const today = dayKey()
+  const power = { ...state.power }
+  if (power[id] > 1) power[id]--
+  else delete power[id]
+  set({ power, days: { ...state.days, [today]: Math.max(0, (state.days[today] ?? 0) - 1) } })
+}
+
+/** Bugün dahil, hedefin tutturulduğu ardışık gün sayısı (bugün henüz tamamlanmadıysa dünden geriye sayar). */
+export function streakOf(days: Record<string, number>): number {
+  const d = new Date()
+  if ((days[dayKey(d)] ?? 0) < DAILY_GOAL) d.setDate(d.getDate() - 1)
+  let n = 0
+  while ((days[dayKey(d)] ?? 0) >= DAILY_GOAL) {
+    n++
+    d.setDate(d.getDate() - 1)
+  }
+  return n
 }
 
 // ——— Akıştan çıkarılanlar (sola kaydırma) ———
@@ -132,7 +188,10 @@ export function updateMine(id: string, patch: Partial<Quote>) {
 export function removeMine(id: string) {
   const hidden = { ...state.hidden }
   delete hidden[id]
+  const power = { ...state.power }
+  delete power[id]
   set({
+    power,
     mine: state.mine.filter((q) => q.id !== id),
     favs: state.favs.filter((f) => f !== id),
     hidden,
@@ -206,6 +265,9 @@ interface Backup {
   mine: Quote[]
   cats?: CustomCategory[]
   hidden?: Record<string, number>
+  favQuotes?: Record<string, Quote>
+  power?: Record<string, number>
+  days?: Record<string, number>
   photoFor: Record<string, string>
   photos: { id: string; createdAt: number; dataUrl: string }[]
 }
@@ -230,10 +292,19 @@ export async function exportBackup(): Promise<Blob> {
     mine: state.mine,
     cats: state.cats,
     hidden: state.hidden,
+    favQuotes: state.favQuotes,
+    power: state.power,
+    days: state.days,
     photoFor: state.photoFor,
     photos,
   }
   return new Blob([JSON.stringify(data)], { type: 'application/json' })
+}
+
+function mergeCounts(a: Record<string, number> = {}, b: Record<string, number> = {}) {
+  const out = { ...a }
+  for (const [k, v] of Object.entries(b)) out[k] = Math.max(out[k] ?? 0, v)
+  return out
 }
 
 export async function importBackup(file: File): Promise<number> {
@@ -250,6 +321,9 @@ export async function importBackup(file: File): Promise<number> {
     mine: [...newMine, ...state.mine],
     cats: [...state.cats, ...(data.cats ?? []).filter((c) => !catIds.has(c.id))],
     hidden: { ...(data.hidden ?? {}), ...state.hidden },
+    favQuotes: { ...(data.favQuotes ?? {}), ...state.favQuotes },
+    power: mergeCounts(data.power, state.power),
+    days: mergeCounts(data.days, state.days),
     favs: Array.from(new Set([...state.favs, ...(data.favs ?? [])])),
     photoFor: { ...(data.photoFor ?? {}), ...state.photoFor },
   })

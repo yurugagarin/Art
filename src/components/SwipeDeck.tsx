@@ -10,7 +10,7 @@ import {
 import { useCallback, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState, type ReactNode, type Ref } from 'react'
 import { flushSync } from 'react-dom'
 import { mod } from '../lib/deck'
-import { ChevronIcon, CloseIcon, RepeatIcon } from './Icons'
+import { BoltIcon, ChevronIcon, CloseIcon } from './Icons'
 
 export type SwipeDir = 'left' | 'right'
 
@@ -264,8 +264,8 @@ export function SwipeDeck<T extends { id: string }>({
           <button className="deck-nav deck-prev" onClick={() => swipe('left')} aria-label="Bir daha gösterme" title="Bir daha gösterme (←)">
             <CloseIcon />
           </button>
-          <button className="deck-nav deck-next" onClick={() => swipe('right')} aria-label="Tekrar göster" title="Tekrar göster (→)">
-            <RepeatIcon />
+          <button className="deck-nav deck-next" onClick={() => swipe('right')} aria-label="Güç aldım" title="Güç aldım (→)">
+            <BoltIcon />
           </button>
         </>
       ) : (
@@ -284,7 +284,7 @@ export function SwipeDeck<T extends { id: string }>({
   )
 }
 
-/** Sürüklerken beliren etiketler: sağa "Tekrar gör", sola "Bir daha gösterme". */
+/** Sürüklerken beliren etiketler: sağa "Güç aldım", sola "Bir daha gösterme". */
 function Stamps({ x }: { x: MotionValue<number> }) {
   const keep = useTransform(x, [20, 110], [0, 1])
   const drop = useTransform(x, [-110, -20], [1, 0])
@@ -293,7 +293,7 @@ function Stamps({ x }: { x: MotionValue<number> }) {
   return (
     <div className="stamps" aria-hidden>
       <motion.div className="stamp stamp-keep" style={{ opacity: keep, scale: keepScale, rotate: -9 }}>
-        <RepeatIcon width={18} height={18} /> Tekrar gör
+        <BoltIcon width={18} height={18} filled /> Güç aldım
       </motion.div>
       <motion.div className="stamp stamp-drop" style={{ opacity: drop, scale: dropScale, rotate: 9 }}>
         <CloseIcon width={18} height={18} /> Bir daha gösterme

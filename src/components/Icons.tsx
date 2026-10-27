@@ -115,3 +115,15 @@ export const EyeIcon = (p: P) => (
     <circle cx="12" cy="12" r="2.8" />
   </svg>
 )
+
+export const BoltIcon = ({ filled, ...p }: P) => (
+  <svg {...base(p)} fill={filled ? 'currentColor' : 'none'}>
+    <path d="M13 2.5L4.5 13.5h6.5l-1 8 8.5-11h-6.5l1-8z" />
+  </svg>
+)
+
+export const FlameIcon = ({ filled, ...p }: P) => (
+  <svg {...base(p)} fill={filled ? 'currentColor' : 'none'}>
+    <path d="M12 21.5c-4 0-7-2.7-7-6.6 0-3.3 2.2-5.3 3.7-7.2.3 1.6 1.2 2.9 2.4 3.3C11 8 11.6 5 14.2 2.5c.4 3 2.3 4.6 3.6 6.3 1 1.4 1.7 3 1.7 5.1 0 4.5-3.3 7.6-7.5 7.6z" />
+  </svg>
+)

@@ -5,7 +5,8 @@ import { CloseIcon, EyeIcon, HeartIcon, MomentumMark, RepeatIcon } from '../comp
 import { PhotoBg } from '../components/PhotoBg'
 import { Sheet } from '../components/Sheet'
 import type { Quote } from '../data/quotes'
-import { hash, photoForQuote, usePhotos } from '../lib/photos'
+import { assignPhotos, hash, usePhotos } from '../lib/photos'
+import { todayKey } from '../lib/deck'
 import { toggleFav, unhideMany, unhideQuote, useStore } from '../lib/store'
 import { toast } from '../lib/toast'
 import { useQuoteMap } from '../lib/useQuotes'
@@ -24,17 +25,19 @@ export function Favorites({ onExplore }: { onExplore: () => void }) {
       Object.entries(hiddenMap)
         .sort((a, b) => b[1] - a[1])
         .map(([id]) => map.get(id))
-        .filter((q): q is Quote => !!q),
+        .filter((q): q is Quote => !!q && !q.legacy),
     [hiddenMap, map],
   )
+  // Izgara ile tam ekran görüntüleyici aynı fotoğrafları göstersin.
+  const tilePhotos = useMemo(() => assignPhotos(favs, photos, photoFor, todayKey()), [favs, photos, photoFor])
   const [openId, setOpenId] = useState<string | null>(null)
   const [showHidden, setShowHidden] = useState(false)
   // Görüntüleyici açıkken liste değişirse (favoriden çıkarma) kartlar yerinde kalsın.
   const [frozen, setFrozen] = useState(favs)
 
-  const remove = (id: string) => {
-    toggleFav(id)
-    toast('Favorilerden çıkarıldı', { label: 'Geri al', run: () => toggleFav(id) })
+  const remove = (q: Quote) => {
+    toggleFav(q)
+    toast('Favorilerden çıkarıldı', { label: 'Geri al', run: () => toggleFav(q) })
   }
 
   return (
@@ -71,7 +74,7 @@ export function Favorites({ onExplore }: { onExplore: () => void }) {
               }}
               style={{ aspectRatio: RATIOS[hash(q.id) % RATIOS.length] }}
             >
-              <PhotoBg photo={photoForQuote(q, photos, photoFor)} thumb />
+              <PhotoBg photo={tilePhotos.get(q.id)!} thumb />
               <div className="tile-shade" />
               <div className="tile-text">
                 <p className="tile-quote">{q.text}</p>
@@ -82,7 +85,7 @@ export function Favorites({ onExplore }: { onExplore: () => void }) {
                 aria-label="Favorilerden çıkar"
                 onClick={(e) => {
                   e.stopPropagation()
-                  remove(q.id)
+                  remove(q)
                 }}
               >
                 <HeartIcon filled width={18} height={18} />

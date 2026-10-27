@@ -2,11 +2,13 @@ import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { CardDeck } from '../components/CardDeck'
-import { CloseIcon, MomentumMark, PenIcon, RepeatIcon, UndoIcon } from '../components/Icons'
+import { BoltIcon, CloseIcon, MomentumMark, PenIcon, RepeatIcon, UndoIcon } from '../components/Icons'
 import type { Quote } from '../data/quotes'
 import { useCategories } from '../lib/categories'
-import { dailyShuffle, greeting, todayKey } from '../lib/deck'
-import { markTipsSeen, unhideMany, useStore } from '../lib/store'
+import { todayKey } from '../lib/deck'
+import { personalOrder, spreadCategories, tasteOf } from '../lib/personal'
+import { getState, markTipsSeen, unhideMany, useStore } from '../lib/store'
+import { MomentumChip } from '../components/Momentum'
 import { useAllQuotes } from '../lib/useQuotes'
 
 export type Filter = 'all' | 'mine' | Quote['cat']
@@ -40,11 +42,14 @@ export function Feed({ focusId, onFocused, onWrite }: Props) {
   const [currentId, setCurrentId] = useState<string | undefined>(saved.id)
   const hasMine = all.some((q) => q.mine)
 
-  // Seçili kategorideki tüm sözler (gizlenenler dahil) ve akışta gösterilecek olanlar.
+  // Seçili kategorideki tüm sözler (gizlenenler dahil), sana göre sıralanmış.
+  // Sıra oturum boyunca sabit kalır; her kaydırmada yeniden karışmaz.
   const pool = useMemo(() => {
     if (filter === 'mine') return all.filter((q) => q.mine)
-    if (filter === 'all') return dailyShuffle(all)
-    return dailyShuffle(all.filter((q) => q.cat === filter))
+    const { power, lastPower } = getState()
+    const list = filter === 'all' ? all : all.filter((q) => q.cat === filter)
+    const ordered = personalOrder(list, power, lastPower, tasteOf(power, all), todayKey())
+    return filter === 'all' ? spreadCategories(ordered) : ordered
   }, [all, filter])
   const deck = useMemo(() => pool.filter((q) => !hidden[q.id]), [pool, hidden])
   const hiddenHere = pool.length - deck.length
@@ -84,6 +89,7 @@ export function Feed({ focusId, onFocused, onWrite }: Props) {
           onCurrent={setCurrentId}
           mode="feed"
           keyboard
+          photoOrder={pool}
           badgeFor={(q) => (q.id === firstOfDay ? 'Günün sözü' : undefined)}
         />
       ) : hiddenHere > 0 ? (
@@ -110,7 +116,7 @@ export function Feed({ focusId, onFocused, onWrite }: Props) {
             <MomentumMark filled className="brand-mark" width={30} height={22} />
             momentum
           </h1>
-          <span className="greet">{greeting()}</span>
+          <MomentumChip />
         </div>
         <nav className="chips" aria-label="Kategoriler">
           {chips.map((c) => (
@@ -135,10 +141,10 @@ function Tips() {
         <ul>
           <li>
             <span className="tips-ico keep">
-              <RepeatIcon width={18} height={18} />
+              <BoltIcon width={18} height={18} />
             </span>
             <span>
-              <b>Sağa kaydır:</b> söz akışta kalır, ileride yine karşına çıkar.
+              <b>Sağa kaydır:</b> bu söz sana güç verdi. Momentum’un dolar; sana iyi gelen türden sözler daha sık gelir.
             </span>
           </li>
           <li>

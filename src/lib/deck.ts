@@ -1,14 +1,8 @@
 import type { Quote } from '../data/quotes'
-import { hash } from './photos'
 
 export const todayKey = () => {
   const d = new Date()
   return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`
-}
-
-/** Her gün farklı, ama gün içinde sabit kalan bir sıralama. */
-export function dailyShuffle<T extends { id: string }>(items: T[], seed = todayKey()): T[] {
-  return [...items].sort((a, b) => hash(seed + a.id) - hash(seed + b.id))
 }
 
 export const mod = (i: number, n: number) => ((i % n) + n) % n

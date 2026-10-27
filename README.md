@@ -4,16 +4,17 @@ Motivasyonun düştüğünde açıp bakacağın kişisel söz uygulaması. Tam e
 
 ## Neler var?
 
-- **Akış:** Her gün farklı sırayla gelen yaklaşık 150 gerçek söz. Hepsinin altında kimin söylediği yazar; İngilizce olanların altında Türkçesi de vardır.
-  - **Sağa kaydır:** Söz akışta kalır, ileride yine karşına çıkar.
+- **Akış:** 359 gerçek motivasyon sözü (atasözü yok). Hepsinin altında kimin söylediği yazar; İngilizce olanların altında Türkçesi de vardır. Sıra her gün değişir, aynı kategoriden üst üste en fazla iki söz gelir.
+  - **Sağa kaydır = ⚡ Güç aldım:** Söz sana iyi geldi demek. Momentum sayacın dolar, akış da zevkine göre şekillenir: sana güç veren kategoriler ve yazarlar daha sık gelir, hiç görmediğin sözler öne çıkar, son günlerde güç aldığın sözler hemen tekrar etmez.
   - **Sola kaydır:** Söz bir daha gösterilmez. Yanlışlıkla yaptıysan kartın sağındaki geri okuna bas. Akıştan çıkardıklarını **Favoriler** sayfasının altından tek tek ya da hepsini birden geri getirebilirsin.
-  - Bilgisayarda: → tekrar gör, ← bir daha gösterme, Backspace geri al.
+  - Bilgisayarda: → güç aldım, ← bir daha gösterme, Backspace geri al.
   - **İki kez dokun:** Söz favorilere eklenir (kalp animasyonuyla).
   - **Bir kez dokun:** Menüler gizlenir, sadece fotoğraf ve söz kalır. Tekrar dokununca geri gelir.
   - Sağdaki düğmeler: geri al, favori, paylaş, **fotoğrafı değiştir**.
-  - Üstteki kategoriler: kendi kategorilerin, Spor & Güç, Disiplin, Kendine Hatırlat, Yaz Ruhu, Bilgelik, Benim.
+  - Üstteki kategoriler: kendi kategorilerin, Spor & Güç, Disiplin, Başarı, Cesaret, Kendine Hatırlat, Yaz Ruhu, Bilgelik, Benim.
   - Sıradaki kartların fotoğrafları önceden indirilir; kaydırınca arkadaki fotoğraf anında hazırdır.
-- **Favoriler:** Pinterest tarzı ızgarada favori sözlerin. Birine dokununca tam ekran açılır.
+- **Momentum:** Sağ üstteki sayaç bugünkü gücünü (günlük hedef 10) ve kaç gündür hedefi tutturduğunu (🔥 seri) gösterir. Dokununca son 7 gün, sana en çok güç veren kategoriler, yazarlar ve sözler açılır.
+- **Favoriler:** Pinterest tarzı ızgarada favori sözlerin. Birine dokununca tam ekran açılır. Favorilediğin her sözün kopyası saklanır; söz ileride listeden çıkarılsa da favorilerinde kalır.
 - **Yaz:** Kendi sözünü ekle. Örneğin "O gömleği giydiğinde nasıl hissettiğini hatırla" ya da birinin sana söylediği bir cümle. Kimin söylediğini, kategoriyi ve fotoğrafı seçebilirsin. **Kendi fotoğrafını da telefonundan yükleyebilirsin.**
 - **Kendi kategorilerin:** Yaz ekranında **+ Yeni kategori** ile ad ve simge seçerek kategori oluştur (örneğin "🏋️ Salon"). Akışın üstünde kendi sekmesi olur. Kategorilerini aynı ekranın altından düzenleyip silebilirsin; silinen kategorideki sözler "Kendine Hatırlat"a taşınır.
 - **Yedek:** Yaz sekmesinin en altında yedek alma ve geri yükleme düğmeleri var. Senin sözlerin ve fotoğrafların sadece telefonunda saklanır, bir sunucuya gönderilmez.
@@ -63,7 +64,7 @@ Sözler `src/data/quotes.ts` dosyasında duruyor:
 ```
 
 - `id`: Benzersiz olmalı ve silinmiş bir sözün kimliği tekrar kullanılmamalı (favoriler ve gizlenenler buna göre tutulur).
-- `cat`: `spor` | `disiplin` | `hatirlat` | `yaz` | `bilgelik`
+- `cat`: `spor` | `disiplin` | `basari` | `cesaret` | `hatirlat` | `yaz` | `bilgelik`
 - `text`: Sözün kendisi. İngilizceyse `tr` alanına Türkçesini yaz.
 - `author`: Sözün sahibi. Kaynağı belli olmayan söz eklemiyoruz.
 - `note`: İsteğe bağlı kaynak bilgisi (kitap, konuşma). Sözün o kişiye ait olduğu kesin değilse `note: '… atfedilir'` yaz.
@@ -76,7 +77,7 @@ Hazır fotoğraflar `src/data/photos.ts` dosyasında. [Unsplash](https://unsplas
 unsplash('1507525428034-b723cf961d3e', 'deniz'),
 ```
 
-Temalar: `yaz`, `deniz`, `gunbatimi`, `doga`, `spor`, `arkadas`. Her kategori kendine uygun temalardan fotoğraf alır. Yüklenemeyen bir fotoğraf olursa uygulama onu otomatik atlar. Fotoğraf yüklenene kadar temaya uygun bir renk geçişi görünür.
+Şu an 105 fotoğraf var. Temalar: `yaz`, `deniz`, `gunbatimi`, `doga`, `spor`, `arkadas`. Her kategori kendine uygun temalardan fotoğraf alır; art arda gelen kartlarda aynı fotoğraf tekrar etmez ve aynı söz her gün başka bir fotoğrafla gelir. Yüklenemeyen bir fotoğraf olursa uygulama onu otomatik atlar. Fotoğraf yüklenene kadar temaya uygun bir renk geçişi görünür.
 
 ## Teknik
 

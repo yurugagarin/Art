@@ -1,9 +1,9 @@
 // Momentum service worker: uygulamayı çevrimdışı açılabilir yapar,
 // görülen fotoğrafları telefonda önbelleğe alır.
-const VERSION = 'v4'
+const VERSION = 'v5'
 const SHELL = `momentum-shell-${VERSION}`
 const PHOTOS = 'momentum-photos'
-const MAX_PHOTOS = 80
+const MAX_PHOTOS = 160
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(SHELL).then((c) => c.addAll(['./', './manifest.webmanifest', './icon.svg'])))

@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Quote } from '../data/quotes'
-import { mod, shareQuote } from '../lib/deck'
+import type { Photo } from '../data/photos'
+import { mod, shareQuote, todayKey } from '../lib/deck'
 import { preload } from '../lib/imageCache'
-import { photoForQuote, usePhotos } from '../lib/photos'
-import { addFav, hideQuote, markBroken, setPhotoFor, toggleFav, unhideQuote, useStore } from '../lib/store'
+import { assignPhotos, photoForQuote, usePhotos } from '../lib/photos'
+import { addFav, addPower, getState, hideQuote, markBroken, setPhotoFor, streakOf, toggleFav, undoPower, unhideQuote, useStore } from '../lib/store'
 import { toast } from '../lib/toast'
 import { burstHeart } from './HeartBurst'
 import { PhotoGrid } from './PhotoGrid'
@@ -19,10 +20,15 @@ interface Props {
   mode: 'feed' | 'browse'
   keyboard?: boolean
   badgeFor?: (q: Quote) => string | undefined
+  /**
+   * Fotoğrafların hangi sıra üzerinden dağıtılacağı (varsayılan: quotes).
+   * Akışta gizlenenler dahil tüm liste verilir ki bir söz gizlenince diğerlerinin fotoğrafı değişmesin.
+   */
+  photoOrder?: Quote[]
 }
 
 /** Kaydırmalı söz kartları + favori, paylaş, geri al ve fotoğraf değiştir eylemleri. */
-export function CardDeck({ quotes, currentId, onCurrent, mode, keyboard, badgeFor }: Props) {
+export function CardDeck({ quotes, currentId, onCurrent, mode, keyboard, badgeFor, photoOrder }: Props) {
   const photos = usePhotos()
   const photoFor = useStore((s) => s.photoFor)
   const favs = useStore((s) => s.favs)
@@ -35,6 +41,19 @@ export function CardDeck({ quotes, currentId, onCurrent, mode, keyboard, badgeFo
   const n = quotes.length
   const index = Math.max(0, quotes.findIndex((q) => q.id === currentId))
 
+  // Her kartın fotoğrafı: art arda tekrar etmeyen, her gün değişen dağıtım.
+  const assigned = useMemo(
+    () => assignPhotos(photoOrder ?? quotes, photos, photoFor, todayKey()),
+    [photoOrder, quotes, photos, photoFor],
+  )
+  // Listeden düşen (ör. uçarken gizlenen) kart da son fotoğrafıyla kalsın.
+  const [lastPhoto] = useState(() => new Map<string, Photo>())
+  const photoOf = (q: Quote): Photo => {
+    const p = assigned.get(q.id) ?? lastPhoto.get(q.id) ?? photoForQuote(q, photos, photoFor)
+    lastPhoto.set(q.id, p)
+    return p
+  }
+
   // Tek dokunuş: sadece fotoğraf ve söz kalsın (sade görünüm).
   useEffect(() => {
     document.documentElement.classList.toggle('zen', zen)
@@ -45,11 +64,12 @@ export function CardDeck({ quotes, currentId, onCurrent, mode, keyboard, badgeFo
   useEffect(() => {
     if (!n) return
     for (const d of [1, 2, 3, 4, -1]) {
-      const p = photoForQuote(quotes[mod(index + d, n)], photos, photoFor)
+      const q = quotes[mod(index + d, n)]
+      const p = assigned.get(q.id) ?? photoForQuote(q, photos, photoFor)
       // Yüklenemeyen fotoğraf, kart daha ekrana gelmeden değiştirilir.
       if (!p.own) preload(p.src, () => markBroken(p.id))
     }
-  }, [index, n, quotes, photos, photoFor])
+  }, [index, n, quotes, photos, photoFor, assigned])
 
   const push = (entry: { id: string; dir: SwipeDir }) => {
     history.current = [...history.current.slice(-49), entry]
@@ -62,6 +82,7 @@ export function CardDeck({ quotes, currentId, onCurrent, mode, keyboard, badgeFo
     if (last) {
       deck.current?.back(last.dir, last.id, () => {
         if (mode === 'feed' && last.dir === 'left') unhideQuote(last.id)
+        if (mode === 'feed' && last.dir === 'right') undoPower(last.id)
         onCurrent(last.id)
       })
     } else if (mode === 'browse' && n > 1) {
@@ -75,11 +96,20 @@ export function CardDeck({ quotes, currentId, onCurrent, mode, keyboard, badgeFo
     push({ id: q.id, dir })
     // Bildirim yok: yanlışlıkla atılan söz, kartın sağındaki geri okuyla geri gelir.
     if (mode === 'feed' && dir === 'left') hideQuote(q.id)
+    // Sağa = "güç aldım": Momentum'a eklenir, akış zevkine göre şekillenir.
+    if (mode === 'feed' && dir === 'right') {
+      const goal = addPower(q.id)
+      window.dispatchEvent(new CustomEvent('momentum:power'))
+      if (goal) {
+        navigator.vibrate?.([12, 60, 12])
+        toast(`Bugünün dozu tamam! 🔥 ${streakOf(getState().days)} günlük seri`)
+      }
+    }
     if (next && next.id !== q.id) onCurrent(next.id)
   }
 
   const fav = (q: Quote) => {
-    const on = toggleFav(q.id)
+    const on = toggleFav(q)
     if (on) navigator.vibrate?.(12)
     toast(on ? 'Favorilere eklendi ♥' : 'Favorilerden çıkarıldı')
   }
@@ -106,12 +136,12 @@ export function CardDeck({ quotes, currentId, onCurrent, mode, keyboard, badgeFo
         onDoubleTap={(q, p) => {
           burstHeart(p.x, p.y)
           navigator.vibrate?.(12)
-          addFav(q.id)
+          addFav(q)
         }}
         render={(q, role) => (
           <QuoteCard
             quote={q}
-            photo={photoForQuote(q, photos, photoFor)}
+            photo={photoOf(q)}
             active={role === 'top'}
             // Yavaş yakınlaşma sadece üstteki kartta çalışır.
             moving={role === 'top'}
@@ -128,7 +158,7 @@ export function CardDeck({ quotes, currentId, onCurrent, mode, keyboard, badgeFo
       <Sheet open={!!picking} title="Bu söze bir fotoğraf seç" onClose={() => setPicking(null)}>
         {picking && (
           <PhotoGrid
-            selected={photoForQuote(picking, photos, photoFor).id}
+            selected={photoOf(picking).id}
             onSelect={(p) => {
               setPhotoFor(picking.id, p.id)
               setPicking(null)

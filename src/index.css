@@ -182,6 +182,262 @@ button:disabled {
   color: var(--dark-ink);
 }
 
+/* ——— Momentum sayacı ——— */
+.mchip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px 5px 6px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(20, 12, 16, 0.32);
+  backdrop-filter: blur(14px) saturate(1.4);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  pointer-events: auto;
+  font-weight: 800;
+}
+
+.mchip.done {
+  border-color: rgba(255, 179, 107, 0.6);
+  box-shadow: 0 0 22px rgba(255, 143, 107, 0.35);
+}
+
+.mchip-ring {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  color: var(--accent);
+}
+
+.mchip-ring svg {
+  position: absolute;
+  inset: 0;
+  transform: rotate(-90deg);
+}
+
+.mchip-ring > svg:last-child {
+  position: relative;
+  inset: auto;
+  transform: none;
+}
+
+.ring-bg,
+.ring-fg {
+  fill: none;
+  stroke-width: 2.6;
+}
+
+.ring-bg {
+  stroke: rgba(255, 255, 255, 0.18);
+}
+
+.ring-fg {
+  stroke: var(--accent);
+  stroke-linecap: round;
+}
+
+.mchip-num {
+  display: inline-block;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+.mchip-num small {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.mchip-streak {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 2px;
+  color: #ff8a5c;
+  font-size: 14px;
+}
+
+.mchip-pop {
+  position: absolute;
+  right: 8px;
+  top: 0;
+  opacity: 0;
+  animation: mpop 0.8s ease-out forwards;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--accent);
+  pointer-events: none;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+@keyframes mpop {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.8);
+  }
+  25% {
+    opacity: 1;
+    transform: translateY(22px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(40px) scale(1);
+  }
+}
+
+/* Momentum ekranı */
+.mstats {
+  padding: 0 2px 6px;
+}
+
+.mhero {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.mhero-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 14px 6px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.mhero-num {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--serif);
+  font-size: 24px;
+  font-weight: 650;
+  color: var(--ink);
+}
+
+.mhero-num svg {
+  color: var(--accent);
+}
+
+.mhero-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.mstats-title {
+  margin: 22px 4px 10px;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.mweek {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  padding: 12px 10px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.mweek-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.mweek-bar {
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+  max-width: 26px;
+  height: 70px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.mweek-bar span {
+  width: 100%;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.mweek-day.hit .mweek-bar span {
+  background: var(--grad);
+}
+
+.mweek-n {
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.mweek-label {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.mweek-day.today .mweek-label {
+  color: var(--accent);
+  font-weight: 800;
+}
+
+.mbars {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mbars li {
+  display: grid;
+  grid-template-columns: 132px 1fr 30px;
+  align-items: center;
+  gap: 10px;
+  font-size: 13.5px;
+  font-weight: 650;
+}
+
+.mbars-track {
+  height: 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.07);
+  overflow: hidden;
+}
+
+.mbars-track span {
+  display: block;
+  height: 100%;
+  border-radius: 10px;
+  background: var(--grad);
+}
+
+.mbars-n,
+.mtop-n {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--accent);
+  text-align: right;
+}
+
+.mtop-n {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex: none;
+}
+
 /* ——— Deste ——— */
 
 .deck {
@@ -1562,7 +1818,7 @@ button:disabled {
     right: -70px;
   }
   .app.tab-akis::after {
-    content: '→ tekrar gör · ← bir daha gösterme · Backspace: geri al · iki tık: favori';
+    content: '→ güç aldım · ← bir daha gösterme · Backspace: geri al · iki tık: favori';
     position: fixed;
     left: 0;
     right: 0;
