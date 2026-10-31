@@ -42,7 +42,8 @@ export function QuoteCard({ quote, photo, moving = true, fav, badge, canBack, on
         {quote.author && (
           <p className="quote-author">
             <span className="dash" aria-hidden />
-            {quote.author}
+            {/* Büyük harfe çevirme dil kuralına göre: İngilizce sözlerde "RICHARD", Türkçe sözlerde "HİKMET". */}
+            <span lang={quote.tr ? 'en' : 'tr'}>{quote.author}</span>
             {quote.note && <span className="quote-note">{quote.note}</span>}
           </p>
         )}

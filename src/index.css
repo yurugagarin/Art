@@ -505,6 +505,22 @@ button:disabled {
   text-align: right;
 }
 
+.mshare {
+  margin-top: 26px;
+}
+
+.mshare .btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.mshare .sheet-note {
+  margin-top: 10px;
+  text-align: center;
+}
+
 .mtop-n {
   display: inline-flex;
   align-items: center;
@@ -1202,28 +1218,7 @@ button:disabled {
   transition: opacity 0.35s;
 }
 
-/* Akıştan çıkarılanlar */
-.hidden-link {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  margin-top: 26px;
-  padding: 15px 18px;
-  border-radius: 20px;
-  border: 1px dashed rgba(255, 255, 255, 0.16);
-  background: rgba(255, 255, 255, 0.03);
-  color: var(--muted);
-  font-size: 14px;
-  font-weight: 600;
-  text-align: left;
-}
-
-.hidden-link b {
-  margin-left: 4px;
-  color: var(--ink);
-}
-
+/* Liste (Momentum ekranı) */
 .sheet-note {
   margin: 0 4px 14px;
   font-size: 13.5px;

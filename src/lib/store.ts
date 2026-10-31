@@ -168,6 +168,30 @@ export function unhideQuote(id: string) {
   set({ hidden })
 }
 
+/**
+ * Sola kaydırılan sözleri her yerden temizler: favoriler, favori kopyaları, güç sayıları
+ * ve seçili fotoğraflar. Uygulama her açıldığında çalışır (aynı oturumdaki "geri al" bozulmasın diye
+ * kaydırma anında değil).
+ */
+export function purgeHidden() {
+  const ids = Object.keys(state.hidden)
+  if (!ids.length) return
+  const gone = new Set(ids)
+  const keep = <T,>(o: Record<string, T>) => Object.fromEntries(Object.entries(o).filter(([k]) => !gone.has(k)))
+  const favs = state.favs.filter((f) => !gone.has(f))
+  const changed =
+    favs.length !== state.favs.length ||
+    ids.some((id) => id in state.favQuotes || id in state.power || id in state.lastPower || id in state.photoFor)
+  if (!changed) return
+  set({
+    favs,
+    favQuotes: keep(state.favQuotes),
+    power: keep(state.power),
+    lastPower: keep(state.lastPower),
+    photoFor: keep(state.photoFor),
+  })
+}
+
 export function unhideMany(ids: string[]) {
   const hidden = { ...state.hidden }
   ids.forEach((id) => delete hidden[id])

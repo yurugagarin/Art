@@ -5,7 +5,7 @@ import { HeartIcon, MomentumMark, PenIcon } from './components/Icons'
 import { Compose } from './screens/Compose'
 import { Favorites } from './screens/Favorites'
 import { Feed } from './screens/Feed'
-import { loadOwnPhotos, useStore } from './lib/store'
+import { loadOwnPhotos, purgeHidden, useStore } from './lib/store'
 import { dismissToast, useToast } from './lib/toast'
 
 type Tab = 'akis' | 'favoriler' | 'yaz'
@@ -24,6 +24,8 @@ export default function App() {
 
   useEffect(() => {
     loadOwnPhotos()
+    // Sola kaydırılanlar tamamen silinir: favorilerden ve istatistiklerden de çıkar.
+    purgeHidden()
   }, [])
 
   useEffect(() => {

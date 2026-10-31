@@ -2,12 +2,12 @@ import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { CardDeck } from '../components/CardDeck'
-import { BoltIcon, CloseIcon, MomentumMark, PenIcon, RepeatIcon, UndoIcon } from '../components/Icons'
+import { BoltIcon, CloseIcon, MomentumMark, PenIcon, UndoIcon } from '../components/Icons'
 import type { Quote } from '../data/quotes'
 import { useCategories } from '../lib/categories'
 import { todayKey } from '../lib/deck'
 import { buildSosDeck, personalOrder, spreadCategories, tasteOf, type SosDeck } from '../lib/personal'
-import { getState, markTipsSeen, unhideMany, useStore } from '../lib/store'
+import { getState, markTipsSeen, useStore } from '../lib/store'
 import { MomentumChip } from '../components/Momentum'
 import { useAllQuotes, useQuoteMap } from '../lib/useQuotes'
 
@@ -132,10 +132,10 @@ export function Feed({ focusId, onFocused, onWrite }: Props) {
         </div>
       ) : hiddenHere > 0 ? (
         <div className="empty empty-feed">
-          <p className="empty-title">Hepsini gördün</p>
-          <p>Bu bölümdeki sözlerin hepsini sola kaydırdın. İstersen geri getirebilirsin.</p>
-          <button className="btn-primary" onClick={() => unhideMany(pool.map((q) => q.id))}>
-            <RepeatIcon /> Geri getir ({hiddenHere})
+          <p className="empty-title">Bu bölüm bitti</p>
+          <p>Buradaki sözlerin hepsini sola kaydırıp kaldırdın.</p>
+          <button className="btn-primary" onClick={() => choose('all')}>
+            <MomentumMark /> Bütün sözlere dön
           </button>
         </div>
       ) : (
@@ -205,7 +205,7 @@ function Tips() {
               <CloseIcon width={18} height={18} />
             </span>
             <span>
-              <b>Sola kaydır:</b> bir daha gösterilmez. Favoriler sayfasından geri getirebilirsin.
+              <b>Sola kaydır:</b> söz tamamen kaldırılır, bir daha karşına çıkmaz.
             </span>
           </li>
           <li>

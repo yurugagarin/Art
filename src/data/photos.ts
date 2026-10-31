@@ -2,7 +2,7 @@
 // Yüklenemeyen bir fotoğraf olursa uygulama onu otomatik atlar ve yerine başka bir
 // fotoğraf koyar; yüklenene kadar da temaya uygun bir renk geçişi gösterilir.
 
-export type PhotoTheme = 'yaz' | 'deniz' | 'gunbatimi' | 'doga' | 'spor' | 'arkadas'
+export type PhotoTheme = 'yaz' | 'deniz' | 'gunbatimi' | 'doga' | 'spor' | 'arkadas' | 'gokyuzu'
 
 export interface Photo {
   id: string
@@ -33,13 +33,13 @@ export const PHOTOS: Photo[] = [
   unsplash('1471922694854-ff1b63b20054', 'yaz'),
   unsplash('1506953823976-52e1fdc0149a', 'yaz'),
   // Gün batımı & doğa
-  unsplash('1506905925346-21bda4d32df4', 'gunbatimi'),
+  unsplash('1506905925346-21bda4d32df4', 'gokyuzu'),
   unsplash('1469474968028-56623f02e42e', 'gunbatimi'),
   unsplash('1470071459604-3b5ec3a7fe05', 'doga'),
   unsplash('1441974231531-c6227db76b6e', 'doga'),
   unsplash('1501785888041-af3ef285b470', 'doga'),
-  unsplash('1464822759023-fed622ff2c3b', 'doga'),
-  unsplash('1519681393784-d120267933ba', 'gunbatimi'),
+  unsplash('1464822759023-fed622ff2c3b', 'gokyuzu'),
+  unsplash('1519681393784-d120267933ba', 'gokyuzu'),
   unsplash('1472214103451-9374bd1c798e', 'doga'),
   unsplash('1490750967868-88aa4486c946', 'yaz'),
   unsplash('1500534314209-a25ddb2bd429', 'gunbatimi'),
@@ -67,7 +67,7 @@ export const PHOTOS: Photo[] = [
   unsplash('1433086966358-54859d0ed716', 'doga'),
   unsplash('1476514525535-07fb3b4ae5f1', 'doga'),
   unsplash('1502082553048-f009c37129b9', 'doga'),
-  unsplash('1454496522488-7a8e488e8606', 'doga'),
+  unsplash('1454496522488-7a8e488e8606', 'gokyuzu'),
   unsplash('1483728642387-6c3bdd6c93e5', 'doga'),
   unsplash('1504198453319-5ce911bafcde', 'doga'),
   unsplash('1500964757637-c85e8a162699', 'doga'),
@@ -75,8 +75,8 @@ export const PHOTOS: Photo[] = [
   unsplash('1439066615861-d1af74d74000', 'doga'),
   unsplash('1418065460487-3e41a6c84dc5', 'doga'),
   unsplash('1490730141103-6cac27aaab94', 'gunbatimi'),
-  unsplash('1419242902214-272b3f66ee7a', 'gunbatimi'),
-  unsplash('1444080748397-f442aa95c3e5', 'gunbatimi'),
+  unsplash('1419242902214-272b3f66ee7a', 'gokyuzu'),
+  unsplash('1444080748397-f442aa95c3e5', 'gokyuzu'),
   unsplash('1477959858617-67f85cf4f1df', 'gunbatimi'),
   unsplash('1475924156734-496f6cac6ec1', 'gunbatimi'),
   unsplash('1495616811223-4d98c6e9c869', 'gunbatimi'),
@@ -100,9 +100,9 @@ export const PHOTOS: Photo[] = [
   unsplash('1469854523086-cc02fe5d8800', 'yaz'),
   unsplash('1499793983690-e29da59ef1c2', 'yaz'),
   unsplash('1414609245224-afa02bfb3fda', 'yaz'),
-  unsplash('1436491865332-7a61a109cc05', 'yaz'),
-  unsplash('1500835556837-99ac94a94552', 'yaz'),
-  unsplash('1503220317375-aaad61436b1b', 'yaz'),
+  unsplash('1436491865332-7a61a109cc05', 'gokyuzu'),
+  unsplash('1500835556837-99ac94a94552', 'gokyuzu'),
+  unsplash('1503220317375-aaad61436b1b', 'gokyuzu'),
   unsplash('1512100356356-de1b84283e18', 'yaz'),
   unsplash('1540497077202-7c8a3999166f', 'spor'),
   unsplash('1581009146145-b5ef050c2e1e', 'spor'),
@@ -142,5 +142,6 @@ export const THEME_GRADIENTS: Record<PhotoTheme, string> = {
   gunbatimi: 'linear-gradient(165deg, #ffd38a 0%, #f7797d 48%, #6a3093 100%)',
   doga: 'linear-gradient(165deg, #e3f7a1 0%, #8fd6a4 45%, #2f6f68 100%)',
   spor: 'linear-gradient(165deg, #ff8a5c 0%, #d7266f 50%, #2b1155 100%)',
+  gokyuzu: 'linear-gradient(165deg, #d6ecff 0%, #8ec5f2 45%, #3d6fb0 100%)',
   arkadas: 'linear-gradient(165deg, #fff0b8 0%, #ffb547 45%, #f2559e 100%)',
 }

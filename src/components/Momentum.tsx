@@ -3,9 +3,12 @@ import { useEffect, useMemo, useState } from 'react'
 import { useCategories } from '../lib/categories'
 import { greeting } from '../lib/deck'
 import { tasteOf } from '../lib/personal'
-import { DAILY_GOAL, dayKey, streakOf, useStore } from '../lib/store'
-import { useAllQuotes } from '../lib/useQuotes'
-import { BoltIcon, FlameIcon } from './Icons'
+import { DAILY_GOAL, dayKey, getState, streakOf, useStore } from '../lib/store'
+import { toast } from '../lib/toast'
+import { useAllQuotes, useQuoteMap } from '../lib/useQuotes'
+import type { CatInfo } from '../lib/categories'
+import type { Quote } from '../data/quotes'
+import { BoltIcon, FlameIcon, ShareIcon } from './Icons'
 import { Sheet } from './Sheet'
 
 /** Akışın sağ üstündeki sayaç: bugünkü güç / günlük hedef ve seri. */
@@ -75,6 +78,7 @@ function MomentumSheet({ open, onClose }: { open: boolean; onClose: () => void }
   const days = useStore((s) => s.days)
   const power = useStore((s) => s.power)
   const all = useAllQuotes()
+  const byId = useQuoteMap()
   const cats = useCategories()
   const today = days[dayKey()] ?? 0
   const streak = streakOf(days)
@@ -198,7 +202,72 @@ function MomentumSheet({ open, onClose }: { open: boolean; onClose: () => void }
         )}
 
         {total === 0 && <p className="sheet-note">Henüz güç toplamadın. Sana iyi gelen ilk sözü sağa kaydır.</p>}
+
+        <ShareTaste byId={byId} cats={cats} />
       </div>
     </Sheet>
+  )
+}
+
+const line = (q: Quote) => `"${q.text}"${q.author ? ` — ${q.author}` : ''}`
+
+/** Sağa ve sola kaydırılanları düz metin olarak paylaşır (ör. yeni sözler istemek için). */
+function ShareTaste({ byId, cats }: { byId: Map<string, Quote>; cats: CatInfo[] }) {
+  const share = async () => {
+    const { power, hidden, mine } = getState()
+    const quotes = [...byId.values(), ...mine]
+    const taste = tasteOf(power, quotes)
+    const catName = (id: string) => cats.find((c) => c.id === id)?.label ?? id
+    const liked = Object.entries(power)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 80)
+      .map(([id, n]) => ({ q: byId.get(id), n }))
+      .filter((x) => x.q)
+    const dropped = Object.entries(hidden)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 80)
+      .map(([id]) => byId.get(id))
+      .filter((q): q is Quote => !!q)
+    const text = [
+      'Momentum — zevk özetim',
+      '',
+      `Sağa kaydırdığım (güç aldığım) söz: ${Object.keys(power).length}`,
+      `Sola kaydırıp kaldırdığım söz: ${Object.keys(hidden).length}`,
+      '',
+      'En çok güç veren kategoriler: ' +
+        Object.entries(taste.cat)
+          .sort((a, b) => b[1] - a[1])
+          .map(([c, n]) => `${catName(c)} (${n})`)
+          .join(', '),
+      'En sevdiğim isimler: ' +
+        Object.entries(taste.author)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 15)
+          .map(([a, n]) => `${a} (${n})`)
+          .join(', '),
+      '',
+      'SAĞA KAYDIRDIKLARIM:',
+      ...liked.map(({ q, n }) => `+ ${line(q!)}${n > 1 ? ` (×${n})` : ''}`),
+      '',
+      'SOLA KAYDIRDIKLARIM:',
+      ...dropped.map((q) => `- ${line(q)}`),
+    ].join('\n')
+    try {
+      if (navigator.share) await navigator.share({ text })
+      else {
+        await navigator.clipboard.writeText(text)
+        toast('Kopyalandı; istediğin yere yapıştırabilirsin')
+      }
+    } catch (e) {
+      if (!(e instanceof DOMException && e.name === 'AbortError')) toast('Paylaşılamadı')
+    }
+  }
+  return (
+    <div className="mshare">
+      <button className="btn-ghost wide" onClick={share}>
+        <ShareIcon width={18} height={18} /> Zevkimi paylaş
+      </button>
+      <p className="sheet-note">Sağa ve sola kaydırdıklarını metin olarak paylaşır. Claude’a gönderirsen tam senin zevkine göre yeni sözler ekleyebilir.</p>
+    </div>
   )
 }
