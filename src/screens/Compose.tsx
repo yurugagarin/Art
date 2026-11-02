@@ -29,7 +29,7 @@ interface Draft {
   photo?: string
 }
 
-const EMPTY: Draft = { text: '', author: '', cat: 'hatirlat' }
+const EMPTY: Draft = { text: '', author: '', cat: 'kalk' }
 
 export function Compose({ onSaved }: { onSaved: (id: string) => void }) {
   const mine = useStore((s) => s.mine)
@@ -225,11 +225,11 @@ export function Compose({ onSaved }: { onSaved: (id: string) => void }) {
                     aria-label="Kategoriyi sil"
                     onClick={() => {
                       const msg = count
-                        ? `"${c.label}" silinsin mi? İçindeki ${count} söz "Kendine Hatırlat"a taşınacak.`
+                        ? `"${c.label}" silinsin mi? İçindeki ${count} söz "Kalk" kategorisine taşınacak.`
                         : `"${c.label}" silinsin mi?`
                       if (confirm(msg)) {
                         removeCategory(c.id)
-                        if (draft.cat === c.id) setDraft({ ...draft, cat: 'hatirlat' })
+                        if (draft.cat === c.id) setDraft({ ...draft, cat: 'kalk' })
                       }
                     }}
                   >

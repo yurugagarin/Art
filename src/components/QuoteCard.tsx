@@ -2,6 +2,7 @@ import type { Photo } from '../data/photos'
 import type { Quote } from '../data/quotes'
 import { useCategoryOf } from '../lib/categories'
 import { sizeClass } from '../lib/deck'
+import { Highlight } from '../lib/text'
 import { HeartIcon, ImageIcon, ShareIcon, UndoIcon } from './Icons'
 import { PhotoBg } from './PhotoBg'
 
@@ -37,8 +38,14 @@ export function QuoteCard({ quote, photo, moving = true, fav, badge, canBack, on
         <span className="qmark" aria-hidden>
           “
         </span>
-        <blockquote className={`quote ${sizeClass(quote)}`}>{quote.text}</blockquote>
-        {quote.tr && <p className="quote-tr">{quote.tr}</p>}
+        <blockquote className={`quote ${sizeClass(quote)}`}>
+          <Highlight text={quote.text} />
+        </blockquote>
+        {quote.tr && (
+          <p className="quote-tr">
+            <Highlight text={quote.tr} />
+          </p>
+        )}
         {quote.author && (
           <p className="quote-author">
             <span className="dash" aria-hidden />
@@ -47,6 +54,7 @@ export function QuoteCard({ quote, photo, moving = true, fav, badge, canBack, on
             {quote.note && <span className="quote-note">{quote.note}</span>}
           </p>
         )}
+        {!quote.author && quote.note && <p className="quote-fact">{quote.note}</p>}
       </div>
 
       <div className="card-actions">

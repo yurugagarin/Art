@@ -233,11 +233,11 @@ export function updateCategory(id: string, patch: Partial<Pick<CustomCategory, '
   set({ cats: state.cats.map((c) => (c.id === id ? { ...c, ...patch } : c)) })
 }
 
-/** Kategoriyi siler; içindeki sözler "Kendine Hatırlat"a taşınır. */
+/** Kategoriyi siler; içindeki sözler "Kalk" kategorisine taşınır. */
 export function removeCategory(id: string) {
   set({
     cats: state.cats.filter((c) => c.id !== id),
-    mine: state.mine.map((q) => (q.cat === id ? { ...q, cat: 'hatirlat' } : q)),
+    mine: state.mine.map((q) => (q.cat === id ? { ...q, cat: 'kalk' } : q)),
   })
 }
 

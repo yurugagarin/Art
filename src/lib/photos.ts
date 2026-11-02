@@ -6,6 +6,11 @@ import { useStore } from './store'
 const DEFAULT_THEMES: PhotoTheme[] = ['yaz', 'arkadas', 'deniz', 'gunbatimi']
 
 const THEMES_FOR: Record<Category, PhotoTheme[]> = {
+  kalk: ['spor', 'gunbatimi', 'doga', 'gokyuzu'],
+  tekrar: ['spor'],
+  beyin: ['doga', 'gunbatimi', 'gokyuzu', 'deniz'],
+  birakma: ['spor', 'doga', 'gunbatimi'],
+  unlu: ['doga', 'gunbatimi', 'deniz', 'yaz', 'arkadas'],
   spor: ['spor', 'deniz', 'gunbatimi'],
   disiplin: ['doga', 'gunbatimi', 'spor'],
   basari: ['gunbatimi', 'doga', 'spor', 'yaz'],

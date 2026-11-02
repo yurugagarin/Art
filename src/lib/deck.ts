@@ -1,3 +1,4 @@
+import { plain } from './text'
 import type { Quote } from '../data/quotes'
 
 export const todayKey = () => {
@@ -17,7 +18,7 @@ export function greeting(date = new Date()) {
 
 /** Sözün uzunluğuna göre yazı boyutu sınıfı. */
 export function sizeClass(q: Quote) {
-  const n = q.text.length
+  const n = plain(q.text).length
   if (n <= 32) return 'q-xl'
   if (n <= 70) return 'q-lg'
   if (n <= 120) return 'q-md'
@@ -25,7 +26,7 @@ export function sizeClass(q: Quote) {
 }
 
 export async function shareQuote(q: Quote): Promise<'shared' | 'copied' | 'failed'> {
-  const text = `“${q.text}”${q.tr ? `\n${q.tr}` : ''}${q.author ? `\n— ${q.author}` : ''}`
+  const text = `“${plain(q.text)}”${q.tr ? `\n${plain(q.tr)}` : ''}${q.author ? `\n— ${q.author}` : ''}`
   try {
     if (navigator.share) {
       await navigator.share({ text })

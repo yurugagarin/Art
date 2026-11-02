@@ -66,7 +66,8 @@ export function Feed({ focusId, onFocused, onWrite }: Props) {
     if (filter === 'sos') return sos?.list ?? []
     if (filter === 'mine') return all.filter((q) => q.mine)
     const { power, lastPower } = getState()
-    const list = filter === 'all' ? all : all.filter((q) => q.cat === filter)
+    // "Hepsi": ünlü sözler hariç; onlar kendi köşelerinde.
+    const list = filter === 'all' ? all.filter((q) => q.cat !== 'unlu') : all.filter((q) => q.cat === filter)
     const ordered = personalOrder(list, power, lastPower, tasteOf(power, all), todayKey())
     return filter === 'all' ? spreadCategories(ordered) : ordered
   }, [all, filter, sos])

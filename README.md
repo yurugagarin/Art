@@ -4,14 +4,14 @@ Motivasyonun düştüğünde açıp bakacağın kişisel söz uygulaması. Tam e
 
 ## Neler var?
 
-- **Akış:** 545 gerçek motivasyon sözü (atasözü yok). Hepsinin altında kimin söylediği yazar; İngilizce olanların altında Türkçesi de vardır. Sıra her gün değişir, aynı kategoriden üst üste en fazla iki söz gelir.
+- **Akış:** Seni o an kaldıracak kısa ve sert sözler. Anahtar kelimeler vurgulu, bilime dayananların altında kısa bir not var (ör. "Tükenişe yakın tekrarlar en güçlü kas liflerini devreye sokar"). Hepsinin altında kimin söylediği yazar; İngilizce olanların altında Türkçesi de vardır. Sıra her gün değişir, aynı kategoriden üst üste en fazla iki söz gelir.
   - **Sağa kaydır = ⚡ Güç aldım:** Söz sana iyi geldi demek. Momentum sayacın dolar, akış da zevkine göre şekillenir: sana güç veren kategoriler ve yazarlar daha sık gelir, hiç görmediğin sözler öne çıkar, son günlerde güç aldığın sözler hemen tekrar etmez.
   - **Sola kaydır:** Söz tamamen kaldırılır: akıştan, favorilerden ve istatistiklerden silinir. Yanlışlıkla yaptıysan hemen kartın sağındaki geri okuna bas.
   - Bilgisayarda: → güç aldım, ← bir daha gösterme, Backspace geri al.
   - **İki kez dokun:** Söz favorilere eklenir (kalp animasyonuyla).
   - **Bir kez dokun:** Menüler gizlenir, sadece fotoğraf ve söz kalır. Tekrar dokununca geri gelir.
   - Sağdaki düğmeler: geri al, favori, paylaş, **fotoğrafı değiştir**.
-  - Üstteki kategoriler: kendi kategorilerin, 🪂 Atla (paraşüt, yükseklik korkusu ve "hazır olmayı bekleme" sözleri), Spor & Güç, Disiplin, Başarı, Cesaret, Kendine Hatırlat, Yaz Ruhu, Bilgelik, Benim.
+  - Kategoriler: ⚡ Kalk (ertelemeyi kır), 💪 Son Tekrar (set ortası), 🧠 Beyin & Tekrar (neden tekrar etmelisin), 🔥 Bırakma (buraya kadar geldin), 🪂 Atla (paraşüt ve korku), 📜 Ünlü Sözler (arşiv; "Hepsi"de çıkmaz), kendi kategorilerin ve Benim.
   - Sıradaki kartların fotoğrafları önceden indirilir; kaydırınca arkadaki fotoğraf anında hazırdır.
 - **❤️‍🔥 Motivasyonum düştü:** Akışta kategorilerin en başındaki düğme. Dokununca sadece sana iyi gelenler gelir: kendi yazdığın sözler, favorilerin ve en çok güç aldığın sözler, sırayla karışık. Her kartta neden orada olduğu yazar (♥ Favorin, ⚡ 5 kez güç verdi…). Bu modda sola kaydırmak sözü gizlemez, sadece sıradakine geçer; sağa kaydırmak yine güç kazandırır. Üstteki **Kapat** ile normal akışa dönersin.
 - **Momentum:** Sağ üstteki sayaç bugünkü gücünü (günlük hedef 10) ve kaç gündür hedefi tutturduğunu (🔥 seri) gösterir. Dokununca son 7 gün, sana en çok güç veren kategoriler, yazarlar ve sözler açılır. En alttaki **Zevkimi paylaş** sağa ve sola kaydırdıklarını metin olarak paylaşır; bunu Claude'a gönderirsen zevkine göre yeni sözler eklenebilir.
@@ -65,10 +65,10 @@ Sözler `src/data/quotes.ts` dosyasında duruyor:
 ```
 
 - `id`: Benzersiz olmalı ve silinmiş bir sözün kimliği tekrar kullanılmamalı (favoriler ve gizlenenler buna göre tutulur).
-- `cat`: `atla` | `spor` | `disiplin` | `basari` | `cesaret` | `hatirlat` | `yaz` | `bilgelik`
-- `text`: Sözün kendisi. İngilizceyse `tr` alanına Türkçesini yaz.
-- `author`: Sözün sahibi. Kaynağı belli olmayan söz eklemiyoruz.
-- `note`: İsteğe bağlı kaynak bilgisi (kitap, konuşma). Sözün o kişiye ait olduğu kesin değilse `note: '… atfedilir'` yaz.
+- `cat`: `kalk` | `tekrar` | `beyin` | `birakma` | `atla` | `unlu`
+- `text`: Sözün kendisi. İngilizceyse `tr` alanına Türkçesini yaz. Vurgulamak istediğin kelimeyi yıldız içine al: `It rewires for what you *REPEAT*.`
+- `author`: Sözün sahibi; bu uygulama için yazılan kısa sözlerde boş bırakılır.
+- `note`: Yazarı olan sözlerde kaynak (kitap, konuşma; kesin değilse "… atfedilir"). Yazarı olmayan sözlerde kartın altında görünen kısa bilim notu ("Bilim: …").
 
 ## Fotoğraflar
 

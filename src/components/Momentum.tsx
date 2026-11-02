@@ -5,6 +5,7 @@ import { greeting } from '../lib/deck'
 import { tasteOf } from '../lib/personal'
 import { DAILY_GOAL, dayKey, getState, streakOf, useStore } from '../lib/store'
 import { toast } from '../lib/toast'
+import { plain } from '../lib/text'
 import { useAllQuotes, useQuoteMap } from '../lib/useQuotes'
 import type { CatInfo } from '../lib/categories'
 import type { Quote } from '../data/quotes'
@@ -191,7 +192,7 @@ function MomentumSheet({ open, onClose }: { open: boolean; onClose: () => void }
             <ul className="hidden-list">
               {topQuotes.map(({ q, n }) => (
                 <li key={q!.id}>
-                  <p>{q!.text}</p>
+                  <p>{plain(q!.text)}</p>
                   <span className="mtop-n">
                     <BoltIcon width={14} height={14} filled /> {n}
                   </span>
@@ -209,7 +210,7 @@ function MomentumSheet({ open, onClose }: { open: boolean; onClose: () => void }
   )
 }
 
-const line = (q: Quote) => `"${q.text}"${q.author ? ` — ${q.author}` : ''}`
+const line = (q: Quote) => `"${plain(q.text)}"${q.author ? ` — ${q.author}` : ''}`
 
 /** Sağa ve sola kaydırılanları düz metin olarak paylaşır (ör. yeni sözler istemek için). */
 function ShareTaste({ byId, cats }: { byId: Map<string, Quote>; cats: CatInfo[] }) {

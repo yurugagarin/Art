@@ -8,6 +8,7 @@ import { assignPhotos, hash, usePhotos } from '../lib/photos'
 import { todayKey } from '../lib/deck'
 import { toggleFav, useStore } from '../lib/store'
 import { toast } from '../lib/toast'
+import { plain } from '../lib/text'
 import { useQuoteMap } from '../lib/useQuotes'
 
 const RATIOS = ['3 / 4', '4 / 5', '2 / 3', '4 / 5', '1 / 1', '3 / 4']
@@ -66,7 +67,7 @@ export function Favorites({ onExplore }: { onExplore: () => void }) {
               <PhotoBg photo={tilePhotos.get(q.id)!} thumb />
               <div className="tile-shade" />
               <div className="tile-text">
-                <p className="tile-quote">{q.text}</p>
+                <p className="tile-quote">{plain(q.text)}</p>
                 {q.author && (
                   <p className="tile-author" lang={q.tr ? 'en' : 'tr'}>
                     {q.author}
